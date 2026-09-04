@@ -1,3 +1,5 @@
-# ai-workflow-rules
+# AI Workflow Rules
 
-Fill for Zolai Tauri Desktop.
+## Guardrails
+- Cargo target/ build output is git-ignored.
+- Scope to this repo; work on `main`; push to `Zolai-AI/zolai-tauri`.

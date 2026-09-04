@@ -1,3 +1,4 @@
-# UI Context
+# UI Context — Zolai Tauri
 
-Not applicable for Zolai Tauri Desktop (not a web repo).
+Desktop shell UI: local dashboard at `/dashboard/analytics` for KG build +
+analytics. Reuses Next.js UI; offline-first via bundled Ollama + core server.

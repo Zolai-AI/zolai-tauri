@@ -1,24 +1,88 @@
-# zolai-tauri — Offline Zolai desktop app
+# Zolai Desktop (Local Dashboard)
 
-Tauri (Rust) shell bundling the FastAPI server + a local GGUF model for fully
-offline Zolai use.
+This folder contains the **Tauri 2** desktop wrapper for the existing Next.js app in `website/zolai-project`.
 
-## Quick start
-- Dev: `cargo run` (see `src-tauri`)
-- Bundles the core server + Ollama GGUF locally — no cloud required.
+## What you get
 
-## Connect
-Speaks REST/GGUF to `zolai-core`. See `CONNECT.md`.
+- Local-first dashboard (same UI as web)
+- Local SQLite mode (set `DATABASE_PROVIDER=sqlite`)
+- Sidecar orchestration (Ollama, Next.js server, KG build scripts)
 
----
+## Install (Linux)
 
-## Part of the Zolai-AI org
+### One-command installer (recommended)
 
-This repo is a component of the **Zolai-AI** organization — see the
-[org profile](https://github.com/Zolai-AI) for the full ecosystem and
-[`.github/CONTRIBUTING.md`](https://github.com/Zolai-AI/.github/blob/main/community/CONTRIBUTING.md) to contribute.
+```bash
+bash desktop/scripts/install-linux.sh
+```
 
----
+### 1) System dependencies
 
-*Zolai AI · preserving Tedim Zolai (ZVS 2018) with a RAG-first bilingual toolkit for the Zomi people.*
+Tauri needs a WebView + build deps.
 
+On Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install -y \
+  build-essential pkg-config libssl-dev \
+  libwebkit2gtk-4.1-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev
+```
+
+### 2) Rust toolchain
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+rustc --version
+```
+
+### 3) JS deps
+
+```bash
+cd website/zolai-project
+bun install
+```
+
+## Run (dev)
+
+### Web app only
+
+```bash
+cd website/zolai-project
+bun dev
+```
+
+### Desktop shell (Tauri)
+
+```bash
+# from repo root
+cd desktop/src-tauri
+cargo run
+```
+
+## Build KG (local)
+
+```bash
+bash scripts/kg/build_kg.sh
+```
+
+Then open:
+- `/mind` (3D KG)
+- `/dashboard/analytics` (KG counts + report)
+
+## Live logs (desktop)
+
+In the desktop app, open:
+- `/dashboard/analytics`
+
+Click **Run KG build (desktop)** to run `scripts/kg/build_kg.sh` and stream logs into the page.
+
+## Notes
+
+- `cargo` is required to compile the desktop shell.
+- Packaging is handled by `desktop/scripts/build-sidecars.sh` (now bundles Next standalone + portable Node; Ollama bundled on Linux amd64).
+- Output installers/bundles are produced by: `cargo tauri build` (see `desktop/src-tauri/target/release/bundle/`).

@@ -12,3 +12,10 @@ artifacts/
 .venv/
 *.jsonl
 !kaggle_dataset/*.json
+logs/
+tmp/
+*.tsbuildinfo
+notebooks/
+kaggle_dataset/
+playwright-report/
+test-results/

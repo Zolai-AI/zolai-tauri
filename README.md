@@ -86,3 +86,13 @@ Click **Run KG build (desktop)** to run `scripts/kg/build_kg.sh` and stream logs
 - `cargo` is required to compile the desktop shell.
 - Packaging is handled by `desktop/scripts/build-sidecars.sh` (now bundles Next standalone + portable Node; Ollama bundled on Linux amd64).
 - Output installers/bundles are produced by: `cargo tauri build` (see `desktop/src-tauri/target/release/bundle/`).
+
+---
+
+## Part of the Zolai-AI org
+
+This repo is a component of the **[Zolai-AI](https://github.com/Zolai-AI)** organization — see the
+[org profile](https://github.com/Zolai-AI) for the full ecosystem and
+[`.github/CONTRIBUTING.md`](https://github.com/Zolai-AI/.github/blob/main/community/CONTRIBUTING.md) to contribute.
+
+`zolai-core` · `zolai-web` · `zolai-datasets` · `zolai-training` · `zolai-wiki` · `zolai-ai` (monorepo)

@@ -96,3 +96,11 @@ This repo is a component of the **[Zolai-AI](https://github.com/Zolai-AI)** orga
 [`.github/CONTRIBUTING.md`](https://github.com/Zolai-AI/.github/blob/main/CONTRIBUTING.md) to contribute.
 
 `zolai-core` · `zolai-web` · `zolai-datasets` · `zolai-training` · `zolai-wiki` · `zolai-ai` (monorepo)
+
+
+---
+
+## Org context
+
+Full project ecosystem, architecture, design, status & plans: **[Zolai AI Project Brain](https://github.com/Zolai-AI/.github/blob/main/docs/ZOLAI_AI_PROJECT_BRAIN.md)**.
+Part of the [Zolai-AI](https://github.com/Zolai-AI) org.

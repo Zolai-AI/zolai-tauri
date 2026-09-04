@@ -19,3 +19,6 @@ notebooks/
 kaggle_dataset/
 playwright-report/
 test-results/
+
+# Orchestra session-claims runtime artifact
+.pcore-claims/

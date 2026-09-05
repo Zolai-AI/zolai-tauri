@@ -204,3 +204,81 @@ fn main() {
     .expect("error while running tauri application");
 }
 
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use serde_json;
+
+  #[test]
+  fn sidecar_result_serde_roundtrip() {
+    let s = SidecarResult {
+      ok: true,
+      status: Some(0),
+      stdout: "hello\n".into(),
+      stderr: String::new(),
+    };
+    let json = serde_json::to_string(&s).expect("serialize");
+    let parsed: SidecarResult = serde_json::from_str(&json).expect("deserialize");
+    assert!(parsed.ok);
+    assert_eq!(parsed.status, Some(0));
+    assert_eq!(parsed.stdout, "hello\n");
+    assert!(parsed.stderr.is_empty());
+  }
+
+  #[test]
+  fn sidecar_result_serde_failure() {
+    let s = SidecarResult {
+      ok: false,
+      status: Some(1),
+      stdout: String::new(),
+      stderr: "error msg".into(),
+    };
+    let json = serde_json::to_string(&s).expect("serialize");
+    let v: serde_json::Value = serde_json::from_str(&json).expect("to value");
+    assert_eq!(v["ok"], false);
+    assert_eq!(v["status"], 1);
+    assert_eq!(v["stderr"], "error msg");
+  }
+
+  #[test]
+  fn default_sqlite_path_fallback() {
+    // When SQLITE_PATH is not set, returns the hardcoded default.
+    // We temporarily remove the env var if present.
+    let saved = std::env::var("SQLITE_PATH").ok();
+    std::env::remove_var("SQLITE_PATH");
+    let p = default_sqlite_path();
+    assert_eq!(p, PathBuf::from("data/db/zolai.sqlite3"));
+    // Restore.
+    if let Some(v) = saved {
+      std::env::set_var("SQLITE_PATH", v);
+    }
+  }
+
+  #[test]
+  fn default_sqlite_vec_path_fallback() {
+    let saved = std::env::var("SQLITE_VEC_PATH").ok();
+    std::env::remove_var("SQLITE_VEC_PATH");
+    let p = default_sqlite_vec_path();
+    assert_eq!(
+      p,
+      PathBuf::from("desktop/src-tauri/bin/sqlite-vec")
+    );
+    if let Some(v) = saved {
+      std::env::set_var("SQLITE_VEC_PATH", v);
+    }
+  }
+
+  #[test]
+  fn sqlite_vec_status_struct_serde() {
+    let s = SqliteVecStatus {
+      ok: true,
+      sqlite_path: "/tmp/test.db".into(),
+      extension_path: "/tmp/vec.so".into(),
+      error: None,
+    };
+    let json = serde_json::to_string(&s).expect("serialize");
+    assert!(json.contains("\"ok\":true"));
+    assert!(json.contains("test.db"));
+  }
+}
+

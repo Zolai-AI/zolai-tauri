@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use rusqlite::params;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -185,6 +186,172 @@ fn ollama_status() -> Result<SidecarResult, String> {
   run_sidecar("ollama", &["--version"])
 }
 
+// ---------------------------------------------------------------------------
+// Database commands
+// ---------------------------------------------------------------------------
+
+#[derive(Serialize)]
+struct DbInitResult {
+  ok: bool,
+  db_path: String,
+  tables_created: usize,
+  error: Option<String>,
+}
+
+#[tauri::command]
+fn db_init() -> Result<DbInitResult, String> {
+  let db_path = default_sqlite_path();
+
+  // Ensure parent directory exists
+  if let Some(parent) = db_path.parent() {
+    std::fs::create_dir_all(parent)
+      .map_err(|e| format!("Failed to create db directory: {e}"))?;
+  }
+
+  let conn = rusqlite::Connection::open(&db_path)
+    .map_err(|e| format!("Failed to open database: {e}"))?;
+
+  // Enable WAL mode
+  conn.execute_batch("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")
+    .map_err(|e| format!("Failed to set pragmas: {e}"))?;
+
+  // Create all 8 tables
+  let schema = include_str!("../db/schema.sql");
+  conn.execute_batch(schema)
+    .map_err(|e| format!("Failed to create schema: {e}"))?;
+
+  // Count tables created
+  let table_count: usize = conn
+    .prepare("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    .map_err(|e| format!("Failed to count tables: {e}"))?
+    .query_row([], |row| row.get(0))
+    .map_err(|e| format!("Failed to query table count: {e}"))?;
+
+  Ok(DbInitResult {
+    ok: true,
+    db_path: db_path.display().to_string(),
+    tables_created: table_count,
+    error: None,
+  })
+}
+
+#[derive(Serialize)]
+struct DictEntry {
+  zolai: String,
+  english: String,
+  english_clean: Option<String>,
+  source: String,
+  pos: String,
+}
+
+#[tauri::command]
+fn db_lookup_word(word: String) -> Result<Vec<DictEntry>, String> {
+  let db_path = default_sqlite_path();
+  let conn = rusqlite::Connection::open(&db_path)
+    .map_err(|e| format!("Failed to open database: {e}"))?;
+
+  let pattern = format!("%{word}%");
+  let mut stmt = conn
+    .prepare(
+      "SELECT zolai, english, english_clean, source, pos
+       FROM dictionary
+       WHERE zolai LIKE ?1 OR english LIKE ?1
+       LIMIT 50",
+    )
+    .map_err(|e| format!("Failed to prepare query: {e}"))?;
+
+  let entries = stmt
+    .query_map(params![pattern], |row| {
+      Ok(DictEntry {
+        zolai: row.get(0)?,
+        english: row.get(1)?,
+        english_clean: row.get(2)?,
+        source: row.get(3)?,
+        pos: row.get(4)?,
+      })
+    })
+    .map_err(|e| format!("Query failed: {e}"))?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| format!("Failed to collect results: {e}"))?;
+
+  Ok(entries)
+}
+
+#[derive(Serialize)]
+struct BibleVerse {
+  ref_id: String,
+  book: String,
+  chapter: i32,
+  verse: i32,
+  zo_tdb77: String,
+  zo_tedim2010: String,
+  en_kjv: String,
+}
+
+#[tauri::command]
+fn db_search_bible(query: String) -> Result<Vec<BibleVerse>, String> {
+  let db_path = default_sqlite_path();
+  let conn = rusqlite::Connection::open(&db_path)
+    .map_err(|e| format!("Failed to open database: {e}"))?;
+
+  let pattern = format!("%{query}%");
+  let mut stmt = conn
+    .prepare(
+      "SELECT ref, book, chapter, verse, zo_tdb77, zo_tedim2010, en_kJV
+       FROM bible_verses
+       WHERE zo_tdb77 LIKE ?1 OR zo_tedim2010 LIKE ?1 OR en_kJV LIKE ?1
+       LIMIT 100",
+    )
+    .map_err(|e| format!("Failed to prepare query: {e}"))?;
+
+  let verses = stmt
+    .query_map(params![pattern], |row| {
+      Ok(BibleVerse {
+        ref_id: row.get(0)?,
+        book: row.get(1)?,
+        chapter: row.get(2)?,
+        verse: row.get(3)?,
+        zo_tdb77: row.get(4)?,
+        zo_tedim2010: row.get(5)?,
+        en_kjv: row.get(6)?,
+      })
+    })
+    .map_err(|e| format!("Query failed: {e}"))?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| format!("Failed to collect results: {e}"))?;
+
+  Ok(verses)
+}
+
+#[derive(Serialize)]
+struct CountResult {
+  table: String,
+  count: i64,
+}
+
+#[tauri::command]
+fn db_count(table: String) -> Result<CountResult, String> {
+  let db_path = default_sqlite_path();
+  let conn = rusqlite::Connection::open(&db_path)
+    .map_err(|e| format!("Failed to open database: {e}"))?;
+
+  // Validate table name to prevent SQL injection
+  let valid_tables = [
+    "dictionary", "bible_verses", "grammar_patterns", "phrases",
+    "vocab", "translations", "word_usage", "provenance",
+  ];
+  if !valid_tables.contains(&table.as_str()) {
+    return Err(format!("Invalid table name: {table}"));
+  }
+
+  let sql = format!("SELECT COUNT(*) FROM {table}");
+  let count: i64 = conn
+    .query_row(&sql, [], |row| row.get(0))
+    .map_err(|e| format!("Query failed: {e}"))?;
+
+  Ok(CountResult { table, count })
+}
+
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -198,7 +365,11 @@ fn main() {
       pull_hf_dataset,
       start_training_job,
       next_server_status,
-      ollama_status
+      ollama_status,
+      db_init,
+      db_lookup_word,
+      db_search_bible,
+      db_count,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

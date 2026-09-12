@@ -138,17 +138,18 @@ export interface CoverageResponse {
 }
 
 export interface AuditEntry {
-  id?: number
-  action?: string
-  table_name?: string
+  id: number
+  table_name: string
+  row_id: number
+  field: string
+  old_value: string | null
+  new_value: string | null
+  changed_at: string
+  reason: string
+  // Derived fields for display
+  action?: 'created' | 'updated' | 'deleted'
   entity?: string
   detail?: string
-  who?: string
-  changed_at?: string
-  timestamp?: string
-  old_value?: string
-  new_value?: string
-  [key: string]: unknown
 }
 
 // ---- Run-script result ----------------------------------------------------
@@ -160,8 +161,11 @@ export type RunScriptResult =
 
 // ---- Chat -----------------------------------------------------------------
 export interface ChatZolaiResponse {
-  reply?: string
-  output?: string
+  zolai_response: string
+  english_gloss?: string
+  vocabulary?: string[]
+  zvs_compliant?: boolean
+  context_source?: string
   [key: string]: unknown
 }
 

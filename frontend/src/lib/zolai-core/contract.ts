@@ -64,7 +64,6 @@ export const ROUTES = {
 
   // ---- Chat ---------------------------------------------------------------
   chatZolai: { method: METHOD.POST, path: '/chat/zolai' },
-  chatStream: { method: METHOD.GET, path: '/chat/chat/stream' },
 } as const
 
 export type ExportDataType =

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { PanelShell } from '@/components/panel/panel-shell'
+import { formatCompact } from '@/components/panel/format'
 import { useHealth, useStats } from '@/lib/zolai-core/hooks'
 
 interface Stat {
@@ -35,10 +36,11 @@ export function DashboardPanel() {
   const stats = useStats()
   const health = useHealth()
 
-  const summary: Stat[] = SUMMARY_LABELS.map(([path, label]) => ({
-    label,
-    value: readPath((stats.data ?? {}) as Record<string, unknown>, path) ?? '—',
-  }))
+  const summary: Stat[] = SUMMARY_LABELS.map(([path, label]) => {
+    const raw = readPath((stats.data ?? {}) as Record<string, unknown>, path) ?? '—'
+    const value = typeof raw === 'number' ? formatCompact(raw) : raw
+    return { label, value }
+  })
 
   const loading = stats.isLoading || stats.isFetching
 
@@ -88,7 +90,9 @@ export function DashboardPanel() {
                   className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-1.5 text-sm"
                 >
                   <span className="truncate text-muted-foreground">{name}</span>
-                  <span className="font-mono text-foreground">{rows.toLocaleString()}</span>
+                  <span className="font-mono text-foreground">
+                    {typeof rows === 'number' ? formatCompact(rows) : String(rows)}
+                  </span>
                 </div>
               ))}
             </div>

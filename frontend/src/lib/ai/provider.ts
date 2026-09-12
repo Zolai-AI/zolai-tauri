@@ -8,7 +8,7 @@ import OpenAI from 'openai'
 
 import type { ChatMessageRole } from '@/lib/zolai-core/types'
 import { loadSettings } from '@/lib/zolai-core/config'
-import { postJson, streamText } from '@/lib/zolai-core/client'
+import { postJson } from '@/lib/zolai-core/client'
 import { ROUTES } from '@/lib/zolai-core/contract'
 
 export class ChatProviderError extends Error {
@@ -39,7 +39,7 @@ export async function chatCompletion(messages: ChatMessageRole[]): Promise<strin
 
 /**
  * Streaming chat.
- * - Zolai mode: reads /chat/chat/stream SSE, falls back to buffered POST /chat/zolai.
+ * - Zolai mode: buffered POST /chat/zolai with { message }, reads zolai_response.
  * - Generic mode: OpenAI SDK streaming.
  * Always resolves by handing final text to `onToken` (token-by-token when streaming).
  */
@@ -79,16 +79,13 @@ async function chatStreamZolai(
   onToken: (token: string) => void,
 ): Promise<void> {
   const lastUser = [...messages].reverse().find((m) => m.role === 'user')
-  const prompt = lastUser?.content ?? ''
+  const message = lastUser?.content ?? ''
 
   try {
-    const reply = await streamText(ROUTES.chatStream.path, { prompt }, onToken)
-    if (reply.trim()) return
-  } catch {
-    /* fall through to buffered POST */
+    const data = await postJson<{ zolai_response: string }>(ROUTES.chatZolai.path, { message })
+    const text = data.zolai_response ?? ''
+    if (text) onToken(text)
+  } catch (cause) {
+    throw new ChatProviderError(`Zolai chat failed: ${String(cause)}`)
   }
-
-  const data = await postJson<{ reply?: string }>('/chat/zolai', { prompt })
-  const text = data.reply ?? ''
-  if (text) onToken(text)
 }

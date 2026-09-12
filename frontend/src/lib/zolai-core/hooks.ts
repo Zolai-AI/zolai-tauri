@@ -76,10 +76,40 @@ export function useMonitorCoverage(): UseQueryResult<CoverageResponse, Error> {
   return useQuery({ queryKey: QK.monitorCoverage, queryFn: () => client.getJson<CoverageResponse>(ROUTES.monitorCoverage.path), ...defaultQueryOptions })
 }
 
+function mapAuditEntry(raw: Record<string, unknown>): AuditEntry {
+  const oldValue = (raw.old_value as string | null) ?? null
+  const newValue = (raw.new_value as string | null) ?? null
+  let action: 'created' | 'updated' | 'deleted' = 'updated'
+  if (oldValue === null || oldValue === '') action = 'created'
+  else if (newValue === null || newValue === '') action = 'deleted'
+
+  const entity = String(raw.row_id ?? '')
+  const detail = raw.field
+    ? `${raw.field}: ${oldValue ?? ''} → ${newValue ?? ''}${raw.reason ? ` (${raw.reason})` : ''}`
+    : ''
+
+  return {
+    id: Number(raw.id ?? 0),
+    table_name: String(raw.table_name ?? ''),
+    row_id: Number(raw.row_id ?? 0),
+    field: String(raw.field ?? ''),
+    old_value: oldValue,
+    new_value: newValue,
+    changed_at: String(raw.changed_at ?? ''),
+    reason: String(raw.reason ?? ''),
+    action,
+    entity,
+    detail,
+  }
+}
+
 export function useMonitorAudit(limit = 50): UseQueryResult<AuditEntry[], Error> {
   return useQuery({
     queryKey: QK.monitorAudit(limit),
-    queryFn: () => client.getJson<AuditEntry[]>(ROUTES.monitorAudit.path, { limit }),
+    queryFn: async () => {
+      const raw = await client.getJson<Record<string, unknown>[]>(ROUTES.monitorAudit.path, { limit })
+      return Array.isArray(raw) ? raw.map(mapAuditEntry) : []
+    },
     ...defaultQueryOptions,
   })
 }
@@ -274,8 +304,8 @@ export function useExport(): UseMutationResult<RunScriptResult, Error, ExportDat
 }
 
 // ---- chat ------------------------------------------------------------------
-export function useChatZolai(): UseMutationResult<ChatZolaiResponse, Error, { prompt: string }> {
+export function useChatZolai(): UseMutationResult<ChatZolaiResponse, Error, { message: string }> {
   return useMutation({
-    mutationFn: ({ prompt }) => client.postJson<ChatZolaiResponse>(ROUTES.chatZolai.path, { prompt }),
+    mutationFn: ({ message }) => client.postJson<ChatZolaiResponse>(ROUTES.chatZolai.path, { message }),
   })
 }

@@ -4,6 +4,7 @@ import { PanelShell } from '@/components/panel/panel-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatCompact } from '@/components/panel/format'
 import { useRunQuery, useTables } from '@/lib/zolai-core/hooks'
 
 export function DatabasePanel() {
@@ -31,7 +32,7 @@ export function DatabasePanel() {
                   className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-1.5 text-sm"
                 >
                   <span className="truncate text-muted-foreground">{t.name}</span>
-                  <span className="font-mono text-foreground">{t.rows.toLocaleString()}</span>
+                  <span className="font-mono text-foreground">{formatCompact(t.rows)}</span>
                 </div>
               ))}
             </div>

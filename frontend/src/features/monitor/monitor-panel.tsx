@@ -1,14 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PanelShell } from '@/components/panel/panel-shell'
-import { formatOutput } from '@/components/panel/format'
+import { formatOutput, formatCompact } from '@/components/panel/format'
 import { useMonitorCoverage, useMonitorHealth } from '@/lib/zolai-core/hooks'
 
 function Field({ label, value }: { label: string; value: unknown }) {
+  const displayValue = typeof value === 'number' && Number.isFinite(value) && value >= 1000
+    ? formatCompact(value)
+    : formatOutput(value)
   return (
     <div className="flex items-center justify-between border-b border-border/60 py-1.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-foreground">{formatOutput(value)}</span>
+      <span className="font-mono text-foreground">{displayValue}</span>
     </div>
   )
 }

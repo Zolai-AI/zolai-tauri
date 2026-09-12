@@ -1,6 +1,5 @@
 import { PanelShell } from '@/components/panel/panel-shell'
 import { RunScriptBlock } from '@/components/panel/run-script-block'
-import { formatOutput } from '@/components/panel/format'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuditRecent, useMonitorAudit } from '@/lib/zolai-core/hooks'
@@ -44,12 +43,12 @@ export function AuditPanel() {
                   {auditRows.map((e, i) => (
                     <tr key={i} className="border-b border-border/60 last:border-0">
                       <td className="px-2 py-1">
-                        <Badge variant="outline" className="text-[10px]">{String(e.action ?? '')}</Badge>
+                        <Badge variant="outline" className="text-[10px]">{e.action ?? ''}</Badge>
                       </td>
-                      <td className="px-2 py-1 font-mono">{String(e.table_name ?? '')}</td>
-                      <td className="px-2 py-1">{String(e.entity ?? '')}</td>
-                      <td className="max-w-[16rem] truncate px-2 py-1 text-muted-foreground">{formatOutput(e.detail)}</td>
-                      <td className="px-2 py-1 text-muted-foreground">{String(e.changed_at ?? e.timestamp ?? '')}</td>
+                      <td className="px-2 py-1 font-mono">{e.table_name}</td>
+                      <td className="px-2 py-1">{e.entity}</td>
+                      <td className="max-w-[16rem] truncate px-2 py-1 text-muted-foreground">{e.detail ?? ''}</td>
+                      <td className="px-2 py-1 text-muted-foreground">{e.changed_at}</td>
                     </tr>
                   ))}
                 </tbody>

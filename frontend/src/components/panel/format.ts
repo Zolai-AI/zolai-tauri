@@ -17,3 +17,14 @@ export function formatOutput(value: unknown): string {
   }
   return String(value)
 }
+
+/** Compact number formatting: 1.0K, 189.6K, 1.2M, 845.0B; 1 decimal; non-finite → String; < 1000 as-is. */
+export function formatCompact(value: number): string {
+  if (!Number.isFinite(value)) return String(value)
+  if (value < 1000) return String(value)
+  const units = ['', 'K', 'M', 'B', 'T']
+  const idx = Math.floor(Math.log10(Math.abs(value)) / 3)
+  const unit = units[Math.min(idx, units.length - 1)]
+  const scaled = value / Math.pow(1000, idx)
+  return `${scaled.toFixed(1)}${unit}`
+}

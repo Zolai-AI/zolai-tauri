@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "devUrl": "http://localhost:3000",
+    "devUrl": "http://localhost:8000",
     "frontendDist": "../frontend"
   },
   "app": {

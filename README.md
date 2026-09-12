@@ -1,5 +1,7 @@
 # Zolai Desktop (Local Dashboard)
 
+<p align="center"><img src="logo.png" alt="Zolai AI" width="120"></p>
+
 This folder contains the **Tauri 2** desktop wrapper for the existing Next.js app in `website/zolai-project`.
 
 ## What you get

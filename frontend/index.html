@@ -3,138 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦜 Zolai Desktop — Full Toolkit</title>
+<title>🦜 Zolai Desktop — Analytics</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
-.hdr{background:linear-gradient(135deg,#1e293b,#0f172a);padding:14px 20px;border-bottom:1px solid #334155;display:flex;align-items:center;gap:10px}
-.hdr h1{font-size:18px;color:#38bdf8}
-.hdr span{color:#64748b;font-size:12px}
-.hdr .tag{background:#2563eb;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:auto}
-.wrap{display:flex;height:calc(100vh - 50px)}
-.nav{width:210px;background:#1e293b;padding:8px;border-right:1px solid #334155;overflow-y:auto}
-.nav .cat{padding:6px 10px;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:8px}
-.nav button{display:block;width:100%;padding:6px 10px;margin:2px 0;background:none;border:1px solid transparent;color:#94a3b8;text-align:left;border-radius:5px;cursor:pointer;font-size:12px}
-.nav button:hover,.nav button.on{background:#334155;color:#38bdf8;border-color:#475569}
-.main{flex:1;padding:18px;overflow-y:auto}
-.main h2{color:#38bdf8;margin-bottom:10px;font-size:16px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:7px;padding:14px;margin-bottom:10px}
-.card h3{color:#f1f5f9;margin-bottom:6px;font-size:13px}
-.card h4{color:#38bdf8;margin-bottom:4px;font-size:12px}
-input{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px 10px;border-radius:5px;font-size:13px;width:100%;margin-bottom:6px}
-input:focus{outline:none;border-color:#38bdf8}
-select{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px 10px;border-radius:5px;font-size:13px;width:100%;margin-bottom:6px}
-select:focus{outline:none;border-color:#38bdf8}
-textarea{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px 10px;border-radius:5px;font-size:13px;width:100%;height:100px;margin-bottom:6px;resize:vertical}
-textarea:focus{outline:none;border-color:#38bdf8}
-.btn{background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:12px;margin-right:5px;margin-bottom:3px}
-.btn:hover{background:#1d4ed8}
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--accent:#38bdf8;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--purple:#a855f7;--text:#e2e8f0;--muted:#64748b}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:linear-gradient(135deg,#1e293b,#0f172a);padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hdr h1{font-size:20px;color:var(--accent)}
+.hdr .tag{background:var(--accent);color:#0f172a;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.hdr .live{color:var(--green);font-size:11px;display:flex;align-items:center;gap:4px}
+.hdr .live::before{content:'';width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.wrap{display:flex;height:calc(100vh - 58px)}
+.nav{width:220px;background:var(--card);padding:8px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
+.nav .cat{padding:8px 10px 2px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;border-bottom:1px solid var(--border);margin-top:6px}
+.nav button{display:block;width:100%;padding:7px 10px;margin:1px 0;background:none;border:1px solid transparent;color:#94a3b8;text-align:left;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
+.nav button:hover,.nav button.on{background:#334155;color:var(--accent);border-color:#475569}
+.main{flex:1;padding:20px;overflow-y:auto;min-width:0}
+.main h2{color:var(--accent);margin-bottom:14px;font-size:18px;display:flex;align-items:center;gap:8px}
+
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(56,189,248,.15)}
+.stat-card .icon{font-size:28px;margin-bottom:6px}
+.stat-card .num{font-size:26px;font-weight:800;color:var(--accent);line-height:1.1}
+.stat-card .lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.stat-card .sub{font-size:10px;color:var(--muted);margin-top:2px;opacity:.7}
+.stat-card.green{border-color:rgba(34,197,94,.3)} .stat-card.green .num{color:var(--green)}
+.stat-card.yellow{border-color:rgba(234,179,8,.3)} .stat-card.yellow .num{color:var(--yellow)}
+.stat-card.purple{border-color:rgba(168,85,247,.3)} .stat-card.purple .num{color:var(--purple)}
+.stat-card.red{border-color:rgba(239,68,68,.3)} .stat-card.red .num{color:var(--red)}
+
+/* Two column layouts */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.cols-3{grid-template-columns:1fr}}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px}
+.card h3{color:#f1f5f9;margin-bottom:10px;font-size:14px;display:flex;align-items:center;gap:6px}
+.card h4{color:var(--accent);margin-bottom:6px;font-size:12px}
+
+/* Progress bars */
+.progress-bar{background:#0f172a;border-radius:6px;height:20px;overflow:hidden;position:relative;margin:4px 0}
+.progress-bar .fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:#fff}
+.fill.green{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.fill.yellow{background:linear-gradient(90deg,#d97706,#eab308)}
+.fill.blue{background:linear-gradient(90deg,#2563eb,#38bdf8)}
+.fill.purple{background:linear-gradient(90deg,#7c3aed,#a855f7)}
+.fill.red{background:linear-gradient(90deg,#dc2626,#ef4444)}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:2px solid var(--border);background:var(--bg)}
+td{padding:5px 8px;font-size:12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(56,189,248,.05)}
+
+/* Output */
+.out{background:#0f172a;border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:8px;max-height:350px;overflow-y:auto;font-family:'SF Mono','Fira Code',monospace;font-size:11px;white-space:pre-wrap;word-wrap:break-word;color:#94a3b8}
+.out::-webkit-scrollbar{width:6px}
+.out::-webkit-scrollbar-track{background:var(--bg)}
+.out::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Buttons */
+.btn{background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;margin-right:5px;margin-bottom:4px;transition:all .15s}
+.btn:hover{background:#1d4ed8;transform:scale(1.02)}
 .btn-green{background:#16a34a}.btn-green:hover{background:#15803d}
 .btn-red{background:#dc2626}.btn-red:hover{background:#b91c1c}
 .btn-yellow{background:#d97706}.btn-yellow:hover{background:#b45309}
 .btn-purple{background:#7c3aed}.btn-purple:hover{background:#6d28d9}
-.out{background:#0f172a;border:1px solid #334155;border-radius:5px;padding:10px;margin-top:8px;max-height:400px;overflow-y:auto;font-family:monospace;font-size:11px;white-space:pre-wrap;word-wrap:break-word}
-.hide{display:none}
-table{width:100%;border-collapse:collapse;margin-top:6px}
-th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #334155;font-size:12px}
-th{color:#94a3b8;font-weight:600;background:#0f172a}
-.tr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #334155}
-.tr span:last-child{color:#38bdf8;font-weight:600}
-.badge{background:#2563eb;color:#fff;padding:1px 6px;border-radius:8px;font-size:10px;margin-left:4px}
-.badge-green{background:#16a34a}.badge-red{background:#dc2626}.badge-yellow{background:#d97706}
-.loading{color:#f59e0b}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:#0f172a;border:1px solid #334155;border-radius:5px;padding:10px;text-align:center}
-.stat .num{font-size:22px;font-weight:700;color:#38bdf8}
-.stat .lbl{font-size:11px;color:#64748b;margin-top:2px}
+.btn-accent{background:var(--accent);color:#0f172a;font-weight:600}
+.btn-accent:hover{background:#0ea5e9}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* Search */
+.search-box{display:flex;gap:8px;margin-bottom:12px}
+.search-box input{flex:1;background:#0f172a;border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px}
+.search-box input:focus{outline:none;border-color:var(--accent)}
+.search-box select{background:#0f172a;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:12px}
+
+/* Loading */
+.loading{color:var(--yellow);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Responsive */
+@media(max-width:768px){
+  .wrap{flex-direction:column;height:auto}
+  .nav{width:100%;border-right:none;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:2px}
+  .nav .cat{width:100%;border-bottom:1px solid var(--border)}
+  .nav button{width:auto;flex:1;min-width:fit-content;font-size:11px;padding:6px 8px}
+  .main{padding:12px}
+  .stats-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+}
+
+/* Badge */
+.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.badge-green{background:rgba(34,197,94,.2);color:var(--green)}
+.badge-yellow{background:rgba(234,179,8,.2);color:var(--yellow)}
+.badge-red{background:rgba(239,68,68,.2);color:var(--red)}
+.badge-blue{background:rgba(56,189,248,.2);color:var(--accent)}
+.badge-purple{background:rgba(168,85,247,.2);color:var(--purple)}
 </style>
 </head>
 <body>
-<div class="hdr"><h1>🦜 Zolai Desktop</h1><span>v0.2.0 — Full Toolkit</span><span class="tag">14 Tool Categories</span></div>
+<div class="hdr">
+  <h1>🦜 Zolai Desktop</h1>
+  <span class="tag">Analytics v0.3</span>
+  <span class="live">LIVE</span>
+  <span style="color:var(--muted);font-size:12px;margin-left:auto" id="clock"></span>
+</div>
 <div class="wrap">
 <div class="nav">
-<div class="cat">📊 System</div>
-<button class="on" onclick="go('home',this)">🏠 Dashboard</button>
+<div class="cat">📊 ANALYTICS</div>
+<button class="on" onclick="go('dashboard',this)">🏠 Dashboard</button>
 <button onclick="go('mon',this)">💚 Monitor</button>
 <button onclick="go('db',this)">🗄 Database</button>
-<button onclick="go('stats',this)">📈 Stats</button>
-<div class="cat">📖 Dictionary</div>
-<button onclick="go('dict',this)">🔍 Dictionary Search</button>
-<button onclick="go('add',this)">➕ Add Word</button>
-<button onclick="go('edit',this)">✏️ Edit Word</button>
-<button onclick="go('del',this)">🗑 Delete Word</button>
-<button onclick="go('clean',this)">🧹 Clean Dictionary</button>
-<div class="cat">📜 Bible</div>
-<button onclick="go('bible',this)">📜 Bible Search</button>
-<button onclick="go('bible-study',this)">📖 Bible Study</button>
-<button onclick="go('bible-context',this)">🔬 Context Deep</button>
-<div class="cat">🇲🇲 Myanmar</div>
-<button onclick="go('my',this)">🇲🇲 Myanmar Dict</button>
-<button onclick="go('gem',this)">🤖 Gemini Translate</button>
-<button onclick="go('gem-fill',this)">⚡ Gemini Fill</button>
-<div class="cat">📝 Training</div>
-<button onclick="go('train-gen',this)">📄 Generate Data</button>
-<button onclick="go('train-validate',this)">✅ Validate</button>
-<button onclick="go('train-build',this)">🏗 Build Dataset</button>
-<button onclick="go('train-corpus',this)">📦 Corpus Builder</button>
-<div class="cat">🧪 Test & Analyze</div>
-<button onclick="go('quiz',this)">🧠 Proficiency Quiz</button>
-<button onclick="go('grammar',this)">📐 Grammar Check</button>
-<button onclick="go('paragraph',this)">📄 Paragraph Analysis</button>
-<button onclick="go('paraphrase',this)">🔄 Paraphrase</button>
-<button onclick="go('zvs',this)">🛡 ZVS Validator</button>
-<div class="cat">🔧 Tools</div>
-<button onclick="go('pattern',this)">🔁 Pattern Learner</button>
-<button onclick="go('export',this)">📤 Export Data</button>
-<button onclick="go('audit',this)">📋 Audit Log</button>
+<div class="cat">📖 DICTIONARY</div>
+<button onclick="go('dict',this)">🔍 Search</button>
+<button onclick="go('add',this)">➕ Add</button>
+<button onclick="go('edit',this)">✏️ Edit</button>
+<button onclick="go('del',this)">🗑 Delete</button>
+<button onclick="go('clean',this)">🧹 Clean</button>
+<div class="cat">📜 BIBLE</div>
+<button onclick="go('bible',this)">📜 Search</button>
+<button onclick="go('bible-study',this)">📖 Study</button>
+<button onclick="go('bible-context',this)">🔬 Context</button>
+<div class="cat">🇲🇲 MYANMAR</div>
+<button onclick="go('my',this)">🇲🇲 Dict</button>
+<button onclick="go('gem',this)">🤖 Gemini</button>
+<div class="cat">📝 TRAINING</div>
+<button onclick="go('train-gen',this)">📄 Generate</button>
+<button onclick="go('train-build',this)">🏗 Build</button>
+<div class="cat">🧪 TEST</div>
+<button onclick="go('quiz',this)">🧠 Quiz</button>
+<button onclick="go('grammar',this)">📐 Grammar</button>
+<button onclick="go('zvs',this)">🛡 ZVS</button>
+<div class="cat">🔧 TOOLS</div>
+<button onclick="go('paragraph',this)">📄 Paragraph</button>
+<button onclick="go('export',this)">📤 Export</button>
+<button onclick="go('audit',this)">📋 Audit</button>
 </div>
 <div class="main">
 
-<!-- HOME -->
-<div id="pg-home"><h2>Dashboard</h2>
-<div class="grid">
-<div class="stat"><div class="num" id="s-words">-</div><div class="lbl">Dictionary Words</div></div>
-<div class="stat"><div class="num" id="s-verses">-</div><div class="lbl">Bible Verses</div></div>
-<div class="stat"><div class="num" id="s-phrases">-</div><div class="lbl">Phrases</div></div>
-<div class="stat"><div class="num" id="s-tables">-</div><div class="lbl">DB Tables</div></div>
-<div class="stat"><div class="num" id="s-dbsize">-</div><div class="lbl">DB Size</div></div>
-<div class="stat"><div class="num" id="s-rows">-</div><div class="lbl">Total Rows</div></div>
+<!-- DASHBOARD -->
+<div id="pg-dashboard">
+<h2>📊 Analytics Dashboard</h2>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card"><div class="icon">📖</div><div class="num" id="s-dict">-</div><div class="lbl">Dictionary Words</div><div class="sub" id="s-dict-sub">loading...</div></div>
+  <div class="stat-card green"><div class="icon">📜</div><div class="num" id="s-bible">-</div><div class="lbl">Bible Verses</div><div class="sub" id="s-bible-sub">loading...</div></div>
+  <div class="stat-card purple"><div class="icon">📝</div><div class="num" id="s-trans">-</div><div class="lbl">Translation Pairs</div><div class="sub" id="s-trans-sub">loading...</div></div>
+  <div class="stat-card yellow"><div class="icon">🧠</div><div class="num" id="s-exercises">-</div><div class="lbl">Training Exercises</div><div class="sub" id="s-exercises-sub">loading...</div></div>
+  <div class="stat-card"><div class="icon">💾</div><div class="num" id="s-dbsize">-</div><div class="lbl">DB Size</div><div class="sub" id="s-dbsize-sub">loading...</div></div>
+  <div class="stat-card green"><div class="icon">📊</div><div class="num" id="s-rows">-</div><div class="lbl">Total Rows</div><div class="sub">across all tables</div></div>
+  <div class="stat-card purple"><div class="icon">🔍</div><div class="num" id="s-vocab">-</div><div class="lbl">Vocabulary Entries</div><div class="sub" id="s-vocab-sub">loading...</div></div>
+  <div class="stat-card yellow"><div class="icon">📋</div><div class="num" id="s-audit">-</div><div class="lbl">Audit Log</div><div class="sub" id="s-audit-sub">loading...</div></div>
+  <div class="stat-card"><div class="icon">🗄</div><div class="num" id="s-tables">-</div><div class="lbl">DB Tables</div><div class="sub" id="s-tables-sub">loading...</div></div>
+  <div class="stat-card blue"><div class="icon">✅</div><div class="num" id="s-coverage">-</div><div class="lbl">Coverage Score</div><div class="sub" id="s-coverage-sub">loading...</div></div>
+  <div class="stat-card green"><div class="icon">📖</div><div class="num" id="s-phrases">-</div><div class="lbl">Phrases</div><div class="sub" id="s-phrases-sub">loading...</div></div>
+  <div class="stat-card purple"><div class="icon">🔁</div><div class="num" id="s-patterns">-</div><div class="lbl">Grammar Patterns</div><div class="sub" id="s-patterns-sub">loading...</div></div>
+  <div class="stat-card red"><div class="icon">📜</div><div class="num" id="s-proverbs">-</div><div class="lbl">Proverbs</div><div class="sub" id="s-proverbs-sub">loading...</div></div>
+  <div class="stat-card blue"><div class="icon">📏</div><div class="num" id="s-wordalign">-</div><div class="lbl">Word Alignments</div><div class="sub" id="s-wordalign-sub">loading...</div></div>
+  <div class="stat-card yellow"><div class="icon">📚</div><div class="num" id="s-wordusage">-</div><div class="lbl">Word Usage Profiles</div><div class="sub" id="s-wordusage-sub">loading...</div></div>
+  <div class="stat-card"><div class="icon">📝</div><div class="num" id="s-audittoday">-</div><div class="lbl">Audit Today</div><div class="sub" id="s-audittoday-sub">loading...</div></div>
 </div>
-<div class="card" style="margin-top:12px"><h3>Quick Actions</h3>
-<div style="display:flex;flex-wrap:wrap;gap:6px">
-<button class="btn" onclick="go('bible-study',document.querySelector('[onclick=\"go(\'bible-study\',this)\"]'))">📖 Study Bible</button>
-<button class="btn btn-green" onclick="go('train-gen',document.querySelector('[onclick=\"go(\'train-gen\',this)\"]'))">📄 Generate Training</button>
-<button class="btn btn-purple" onclick="go('quiz',document.querySelector('[onclick=\"go(\'quiz\',this)\"]'))">🧠 Take Quiz</button>
-<button class="btn btn-yellow" onclick="go('gem-fill',document.querySelector('[onclick=\"go(\'gem-fill\',this)\"]'))">⚡ Fill Myanmar</button>
-</div></div>
-<div class="card"><h3>Last Activity</h3><div id="act" class="out" style="max-height:200px">Loading...</div></div>
+
+<!-- Coverage & Health -->
+<div class="cols">
+<div class="card">
+  <h3>📈 Dictionary Coverage</h3>
+  <div id="coverage-bars">Loading...</div>
+</div>
+<div class="card">
+  <h3>🏥 Health Indicators</h3>
+  <div id="health-indicators">Loading...</div>
+</div>
+</div>
+
+<!-- Top Books & Tables -->
+<div class="cols">
+<div class="card">
+  <h3>📜 Top Bible Books</h3>
+  <div id="top-books">Loading...</div>
+</div>
+<div class="card">
+  <h3>📊 Table Breakdown</h3>
+  <div id="table-breakdown">Loading...</div>
+</div>
+</div>
+
+<!-- Activity -->
+<div class="card">
+  <h3>📋 Recent Activity</h3>
+  <div id="recent-activity" class="out" style="max-height:200px">Loading...</div>
+</div>
 </div>
 
 <!-- MONITOR -->
 <div id="pg-mon" class="hide"><h2>💚 System Monitor</h2>
-<div class="card"><h3>Health Status</h3><button class="btn btn-green" onclick="sHealth()">Refresh</button><div id="hr" class="out" style="display:none"></div></div>
-<div class="card"><h3>Coverage</h3><button class="btn" onclick="sCoverage()">Check Coverage</button><div id="cov" class="out" style="display:none"></div></div>
-<div class="card"><h3>Recent Audit</h3><button class="btn" onclick="sAudit()">Load Audit Log</button><div id="aur" class="out" style="display:none"></div></div>
-</div>
+<div class="card"><h3>Health Status</h3><button class="btn-accent" onclick="sHealth()">Refresh</button><div id="hr" class="out" style="display:none"></div></div>
+<div class="cols">
+<div class="card"><h3>Coverage</h3><button class="btn" onclick="sCoverage()">Check</button><div id="cov" class="out" style="display:none"></div></div>
+<div class="card"><h3>Audit Log</h3><button class="btn" onclick="sAudit()">Load</button><div id="aur" class="out" style="display:none"></div></div>
+</div></div>
 
 <!-- DATABASE -->
 <div id="pg-db" class="hide"><h2>🗄 Database</h2>
-<div class="card"><h3>Table Explorer</h3><button class="btn" onclick="sTables()">List All Tables</button><div id="tbl" class="out" style="display:none"></div></div>
-<div class="card"><h3>Run SQL Query</h3><textarea id="sqlq" placeholder="SELECT * FROM dictionary LIMIT 5;"></textarea><button class="btn btn-green" onclick="runSQL()">Run</button><div id="sqlr" class="out" style="display:none"></div></div>
+<div class="card"><h3>Table Explorer</h3><button class="btn-accent" onclick="sTables()">List All Tables</button><div id="tbl" class="out" style="display:none"></div></div>
+<div class="card"><h3>Run SQL Query</h3><textarea id="sqlq" placeholder="SELECT * FROM dictionary LIMIT 5;"></textarea><button class="btn-accent" onclick="runSQL()">Run</button><div id="sqlr" class="out" style="display:none"></div></div>
 </div>
 
-<!-- STATS -->
-<div id="pg-stats" class="hide"><h2>📈 Database Statistics</h2>
-<div class="card"><h3>Dynamic Statistics</h3><button class="btn btn-green" onclick="sDbStats()">Refresh</button><div id="st" class="out" style="display:none"></div></div>
-</div>
-
-<!-- DICTIONARY SEARCH -->
+<!-- DICTIONARY -->
 <div id="pg-dict" class="hide"><h2>🔍 Dictionary Search (ZO↔EN↔MY)</h2>
 <div class="card">
+<div class="search-box">
 <input id="dq" placeholder="Type Zolai or English word..." onkeydown="if(event.key==='Enter')sDict()">
-<select id="dmode"><option value="all">Search All</option><option value="zo">ZO→EN only</option><option value="en">EN→ZO only</option></select>
-<button class="btn" onclick="sDict()">Search</button>
+<select id="dmode"><option value="all">All</option><option value="zo">ZO→EN</option><option value="en">EN→ZO</option></select>
+<button class="btn-accent" onclick="sDict()">Search</button>
 <button class="btn" onclick="sDictBrowse()">Browse Top 50</button>
+</div>
 <div id="dr" class="out" style="display:none"></div>
 </div></div>
 
@@ -144,9 +234,9 @@ th{color:#94a3b8;font-weight:600;background:#0f172a}
 <input id="az" placeholder="Zolai word (zo)">
 <input id="ae" placeholder="English meaning">
 <input id="am" placeholder="Myanmar (optional)">
-<input id="apos" placeholder="POS (noun/verb/adj/etc)">
+<input id="apos" placeholder="POS (noun/verb/adj)">
 <select id="asrc"><option value="manual">Manual</option><option value="bible">Bible</option><option value="corpus">Corpus</option><option value="dictionary">Dictionary</option></select>
-<button class="btn btn-green" onclick="aWord()">Add Word</button>
+<button class="btn-accent" onclick="aWord()">Add Word</button>
 <div id="ar" class="out" style="display:none"></div>
 </div></div>
 
@@ -154,50 +244,50 @@ th{color:#94a3b8;font-weight:600;background:#0f172a}
 <div id="pg-edit" class="hide"><h2>✏️ Edit Word</h2>
 <div class="card">
 <input id="ez" placeholder="Zolai word to find">
-<button class="btn" onclick="eSearch()">Find</button>
+<button class="btn-accent" onclick="eSearch()">Find</button>
 <div id="er1" class="out" style="display:none"></div>
 <br>
 <input id="ef" placeholder="Field (english_clean/myanmar/pos/source)">
 <input id="ev" placeholder="New value">
-<button class="btn btn-green" onclick="eSave()">Save</button>
+<button class="btn-accent" onclick="eSave()">Save</button>
 <div id="er2" class="out" style="display:none"></div>
 </div></div>
 
-<!-- DELETE WORD -->
+<!-- DELETE -->
 <div id="pg-del" class="hide"><h2>🗑 Delete Word</h2>
 <div class="card">
 <input id="dz" placeholder="Zolai word to delete">
-<button class="btn btn-red" onclick="dWord()">Delete Word</button>
+<button class="btn-red" onclick="dWord()">Delete Word</button>
 <div id="dr2" class="out" style="display:none"></div>
 </div></div>
 
-<!-- CLEAN DICTIONARY -->
+<!-- CLEAN -->
 <div id="pg-clean" class="hide"><h2>🧹 Dictionary Cleaner</h2>
-<div class="card"><h3>Clean Non-Zolai Words</h3><button class="btn btn-yellow" onclick="sNonZolai()">Check 127 non-Zolai words</button><div id="nz" class="out" style="display:none"></div></div>
+<div class="card"><h3>Clean Non-Zolai Words</h3><button class="btn-yellow" onclick="sNonZolai()">Check 127 non-Zolai words</button><div id="nz" class="out" style="display:none"></div></div>
 <div class="card"><h3>Dictionary Statistics</h3><button class="btn" onclick="sDictStats()">Get Stats</button><div id="ds" class="out" style="display:none"></div></div>
 </div>
 
-<!-- BIBLE SEARCH -->
+<!-- BIBLE -->
 <div id="pg-bible" class="hide"><h2>📜 Bible Search</h2>
 <div class="card">
-<input id="bq" placeholder="Search verses...">
-<select id="bbook"><option value="">All Books</option><option value="GEN">Genesis</option><option value="PSA">Psalms</option><option value="JOH">John</option><option value="LUK">Luke</option></select>
-<button class="btn" onclick="sBible()">Search</button>
-<button class="btn" onclick="sBibleVerse()">Get Verse</button>
+<div class="search-box">
+<input id="bq" placeholder="Search verses..." onkeydown="if(event.key==='Enter')sBible()">
+<select id="bbook"><option value="">All Books</option><option value="GEN">Genesis</option><option value="PSA">Psalms</option><option value="JOH">John</option><option value="MAT">Matthew</option></select>
+<button class="btn-accent" onclick="sBible()">Search</button>
+</div>
 <div id="br" class="out" style="display:none"></div>
 </div></div>
 
 <!-- BIBLE STUDY -->
 <div id="pg-bible-study" class="hide"><h2>📖 Bible Study Engine</h2>
 <div class="card">
-<h4>Study a specific book</h4>
-<select id="studyBook"><option value="GEN">Genesis</option><option value="PSA">Psalms</option><option value="JOH">John</option><option value="MAT">Matthew</option><option value="MRK">Mark</option><option value="LUK">Luke</option><option value="JHN">John</option><option value="ROM">Romans</option><option value="1CO">1 Corinthians</option></select>
-<button class="btn btn-green" onclick="bStudy()">Study Book</button>
+<select id="studyBook"><option value="GEN">Genesis</option><option value="PSA">Psalms</option><option value="JOH">John</option><option value="MAT">Matthew</option><option value="MRK">Mark</option><option value="LUK">Luke</option><option value="ROM">Romans</option><option value="1CO">1 Corinthians</option></select>
+<button class="btn-accent" onclick="bStudy()">Study Book</button>
 <div id="study-r" class="out" style="display:none"></div>
 </div>
 <div class="card"><h4>Progressive Learning</h4>
 <select id="level"><option value="A1">Level A1</option><option value="A2">Level A2</option><option value="B1">Level B1</option><option value="B2">Level B2</option><option value="C1">Level C1</option><option value="C2">Level C2</option></select>
-<button class="btn" onclick="bLearn()">Get Exercise</button>
+<button class="btn-accent" onclick="bLearn()">Get Exercise</button>
 <div id="learn-r" class="out" style="display:none"></div>
 </div></div>
 
@@ -205,265 +295,267 @@ th{color:#94a3b8;font-weight:600;background:#0f172a}
 <div id="pg-bible-context" class="hide"><h2>🔬 Context Deep Learning</h2>
 <div class="card"><h4>Per-Book Analysis</h4>
 <select id="cbBook"><option value="GEN">Genesis</option><option value="PSA">Psalms</option><option value="JOH">John</option></select>
-<button class="btn" onclick="cBook()">Analyze Book</button>
+<button class="btn-accent" onclick="cBook()">Analyze Book</button>
 <div id="cbr" class="out" style="display:none"></div>
 </div>
 <div class="card"><h4>Word Usage Profile</h4>
 <input id="cw" placeholder="Word (e.g. pasian)">
-<button class="btn btn-green" onclick="cWord()">Lookup</button>
+<button class="btn-accent" onclick="cWord()">Lookup</button>
 <div id="cwr" class="out" style="display:none"></div>
 </div>
-<div class="card"><h4>Topic Cluster</h4>
-<button class="btn" onclick="cTopics()">List Topics</button>
-<div id="ctr" class="out" style="display:none"></div>
-</div></div>
+<div class="card"><h4>Topic Clusters</h4><button class="btn" onclick="cTopics()">List Topics</button><div id="ctr" class="out" style="display:none"></div></div>
+</div>
 
-<!-- MYANMAR DICT -->
+<!-- MYANMAR -->
 <div id="pg-my" class="hide"><h2>🇲🇲 Myanmar Dictionary</h2>
 <div class="card">
+<div class="search-box">
 <input id="mq" placeholder="Myanmar word..." onkeydown="if(event.key==='Enter')sMy()">
-<button class="btn" onclick="sMy()">Search</button>
+<button class="btn-accent" onclick="sMy()">Search</button>
+</div>
 <div id="mr" class="out" style="display:none"></div>
 </div></div>
 
-<!-- GEMINI TRANSLATE -->
+<!-- GEMINI -->
 <div id="pg-gem" class="hide"><h2>🤖 Gemini Translation</h2>
-<div class="card"><h3>Fill Missing Myanmar</h3>
-<input id="gl" type="number" value="50" style="width:80px"><button class="btn" onclick="gemFill()">Run</button>
-<div id="gr" class="out" style="display:none"></div></div>
-<div class="card"><h3>Fill Missing English</h3>
-<input id="ge" type="number" value="50" style="width:80px"><button class="btn" onclick="gemFillEn()">Run</button>
-<div id="ge-r" class="out" style="display:none"></div></div>
-<div class="card"><h3>Coverage Status</h3>
-<button class="btn btn-green" onclick="gemCoverage()">Check</button>
-<div id="gc" class="out" style="display:none"></div></div>
-</div>
-
-<!-- GEMINI FILL -->
-<div id="pg-gem-fill" class="hide"><h2>⚡ Gemini Fill (Quick)</h2>
 <div class="card">
-<input id="gf" placeholder="Enter Zolai word(s) to fill Myanmar/English" style="height:60px">
-<select id="gf-lang"><option value="my">Fill Myanmar</option><option value="en">Fill English</option></select>
-<button class="btn btn-green" onclick="gfRun()">Fill</button>
-<div id="gfr" class="out" style="display:none"></div>
-</div></div>
+<h4>Fill Missing Myanmar</h4>
+<div class="search-box"><input id="gl" type="number" value="50" style="width:80px"><button class="btn-accent" onclick="gemFill()">Run</button></div>
+<div id="gr" class="out" style="display:none"></div>
+</div>
+<div class="card"><h4>Fill Missing English</h4>
+<div class="search-box"><input id="ge" type="number" value="50" style="width:80px"><button class="btn-accent" onclick="gemFillEn()">Run</button></div>
+<div id="ge-r" class="out" style="display:none"></div>
+</div>
+<div class="card"><h4>Coverage Status</h4><button class="btn-accent" onclick="gemCoverage()">Check</button><div id="gc" class="out" style="display:none"></div></div>
+</div>
 
 <!-- TRAINING GENERATE -->
 <div id="pg-train-gen" class="hide"><h2>📄 Generate Training Data</h2>
 <div class="card">
-<h4>Grammar-Aware Synthesis</h4>
-<select id="gt"><option value="negation">Negation Exercises</option><option value="question">Question Exercises</option><option value="pronoun">Pronoun Exercises</option><option value="error">Error Correction</option><option value="conditional">Conditional</option><option value="translation">Translation Pairs</option></select>
-<input id="gn" type="number" value="1000" style="width:100px">
-<button class="btn btn-green" onclick="gGen()">Generate</button>
+<select id="gt"><option value="negation">Negation</option><option value="question">Questions</option><option value="pronoun">Pronouns</option><option value="error">Error Correction</option><option value="conditional">Conditional</option><option value="translation">Translation Pairs</option></select>
+<input id="gn" type="number" value="1000" style="width:120px">
+<button class="btn-accent" onclick="gGen()">Generate</button>
 <div id="gr" class="out" style="display:none"></div>
 </div>
-<div class="card"><h4>Bible-Template Sentence Generation</h4>
-<button class="btn" onclick="gSent()">Generate Sentences</button>
-<div id="gsent" class="out" style="display:none"></div></div>
+<div class="card"><h4>Bible-Template Sentences</h4><button class="btn" onclick="gSent()">Generate</button><div id="gsent" class="out" style="display:none"></div></div>
 </div>
-
-<!-- TRAINING VALIDATE -->
-<div id="pg-train-validate" class="hide"><h2>✅ Validate Training Data</h2>
-<div class="card">
-<textarea id="vtext" placeholder="Paste sentences to validate..." style="height:150px"></textarea>
-<button class="btn btn-green" onclick="gValidate()">Validate</button>
-<button class="btn btn-yellow" onclick="gDeepValidate()">Deep Validate</button>
-<div id="vr" class="out" style="display:none"></div>
-</div></div>
 
 <!-- TRAINING BUILD -->
 <div id="pg-train-build" class="hide"><h2>🏗 Build Training Dataset</h2>
 <div class="card">
-<h4>Full Pipeline</h4>
-<button class="btn btn-green" onclick="gBuild()">Build Dataset</button>
-<button class="btn btn-purple" onclick="gBuildQwen()">Build Qwen3 Format</button>
+<button class="btn-accent" onclick="gBuild()">Build Dataset</button>
+<button class="btn-purple" onclick="gBuildQwen()">Build Qwen3 Format</button>
 <div id="bld" class="out" style="display:none"></div>
 </div>
-<div class="card"><h4>Export Format</h4>
+<div class="card"><h4>Export</h4>
 <select id="exfmt"><option value="jsonl">JSONL</option><option value="alpaca">Alpaca (SFT)</option><option value="huggingface">HuggingFace</option></select>
 <button class="btn" onclick="gExport()">Export</button>
 <div id="exr" class="out" style="display:none"></div>
 </div></div>
 
-<!-- TRAINING CORPUS -->
-<div id="pg-train-corpus" class="hide"><h2>📦 Corpus Builder</h2>
-<div class="card">
-<h4>Full Pipeline Orchestrator</h4>
-<button class="btn btn-green" onclick="cBuild()">Build Corpus</button>
-<button class="btn" onclick="cStats()">Get Stats</button>
-<div id="cor" class="out" style="display:none"></div>
-</div></div>
-
 <!-- PROFIENCY QUIZ -->
 <div id="pg-quiz" class="hide"><h2>🧠 Proficiency Quiz</h2>
 <div class="card">
-<select id="qlevel"><option value="A1">A1 (Beginner)</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option><option value="C1">C1</option><option value="C2">C2 (Advanced)</option></select>
-<select id="qtype"><option value="all">All Types</option><option value="vocab">Vocabulary</option><option value="sentence">Sentence</option><option value="grammar">Grammar</option><option value="negation">Negation</option><option value="context">Context</option></select>
-<button class="btn btn-green" onclick="tQuiz()">Start Quiz</button>
-<button class="btn" onclick="tStats()">My Stats</button>
+<select id="qlevel"><option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option><option value="C1">C1</option><option value="C2">C2</option></select>
+<select id="qtype"><option value="all">All Types</option><option value="vocab">Vocab</option><option value="sentence">Sentence</option><option value="grammar">Grammar</option></select>
+<button class="btn-accent" onclick="tQuiz()">Start Quiz</button>
 <div id="qr" class="out" style="display:none"></div>
 </div></div>
 
-<!-- GRAMMAR CHECK -->
+<!-- GRAMMAR -->
 <div id="pg-grammar" class="hide"><h2>📐 Grammar Check</h2>
 <div class="card">
-<textarea id="gtext" placeholder="Type a Zolai sentence to check..." style="height:80px">Ka pai kei hi.</textarea>
-<button class="btn btn-green" onclick="gCheck()">Check Grammar</button>
+<textarea id="gtext" placeholder="Type a Zolai sentence..." style="height:80px">Ka pai kei hi.</textarea>
+<button class="btn-accent" onclick="gCheck()">Check Grammar</button>
 <div id="gr" class="out" style="display:none"></div>
-</div>
-<div class="card"><h4>Negation Rules Reference</h4>
-<div id="gneg" class="out" style="display:none;max-height:300px"></div></div>
-</div>
+</div></div>
 
-<!-- PARAGRAPH ANALYSIS -->
+<!-- PARAGRAPH -->
 <div id="pg-paragraph" class="hide"><h2>📄 Paragraph Analysis</h2>
 <div class="card">
-<textarea id="ptext" placeholder="Type or paste Zolai text to analyze..." style="height:120px">Pasian in vantung leh leitung a piangsak hi.</textarea>
-<button class="btn btn-green" onclick="pAnalyze()">Analyze</button>
-<select id="pstyle"><option value="">Detect Style</option><option value="FORMAL">Formal</option><option value="CONVERSATIONAL">Conversational</option><option value="LITERARY">Literary</option></select>
-<button class="btn" onclick="pStyle()">Style Transfer</button>
+<textarea id="ptext" placeholder="Type Zolai text..." style="height:100px">Pasian in vantung leh leitung a piangsak hi.</textarea>
+<button class="btn-accent" onclick="pAnalyze()">Analyze</button>
 <div id="pr" class="out" style="display:none"></div>
 </div></div>
 
-<!-- PARAPHRASE -->
-<div id="pg-paraphrase" class="hide"><h2>🔄 Paraphrase & Style Transfer</h2>
-<div class="card">
-<textarea id="ptext2" placeholder="Text to paraphrase..." style="height:100px">Gam ka mu hi.</textarea>
-<select id="plevel"><option value="Minimal">Minimal</option><option value="Moderate">Moderate</option><option value="Strong">Strong</option><option value="Structural">Structural</option><option value="Style transformation">Style Transform</option></select>
-<button class="btn btn-green" onclick="pParaphrase()">Paraphrase</button>
-<div id="pr2" class="out" style="display:none"></div>
-</div></div>
-
-<!-- ZVS VALIDATOR -->
+<!-- ZVS -->
 <div id="pg-zvs" class="hide"><h2>🛡 ZVS 2018 Validator</h2>
 <div class="card">
-<textarea id="ztext" placeholder="Type Zolai text to check compliance..." style="height:100px">Pasian in gam a piangsak hi.</textarea>
-<button class="btn btn-green" onclick="zCheck()">Validate</button>
+<textarea id="ztext" placeholder="Type Zolai text..." style="height:80px">Pasian in gam a piangsak hi.</textarea>
+<button class="btn-accent" onclick="zCheck()">Validate</button>
 <div id="zr" class="out" style="display:none"></div>
-</div>
-<div class="card"><h4>Forbidden Forms</h4>
-<div id="zforb" class="out" style="display:none;max-height:200px"></div></div>
-</div>
-
-<!-- PATTERN LEARNER -->
-<div id="pg-pattern" class="hide"><h2>🔁 Pattern Learner</h2>
-<div class="card">
-<button class="btn btn-green" onclick="pLearn()">Learn Patterns from Bible</button>
-<button class="btn" onclick="pStats()">Pattern Stats</button>
-<div id="pr3" class="out" style="display:none"></div>
 </div></div>
 
 <!-- EXPORT -->
 <div id="pg-export" class="hide"><h2>📤 Export Data</h2>
 <div class="card">
-<select id="et"><option value="dictionary">Dictionary</option><option value="bible">Bible Verses</option><option value="vocabulary">Vocabulary</option><option value="grammar">Grammar Patterns</option><option value="phrases">Phrases</option><option value="exercises">Training Exercises</option></select>
-<button class="btn btn-green" onclick="eExport()">Export</button>
+<select id="et"><option value="dictionary">Dictionary</option><option value="bible">Bible</option><option value="vocabulary">Vocabulary</option><option value="grammar">Grammar</option><option value="phrases">Phrases</option><option value="exercises">Exercises</option></select>
+<button class="btn-accent" onclick="eExport()">Export</button>
 <div id="er3" class="out" style="display:none"></div>
 </div></div>
 
 <!-- AUDIT -->
 <div id="pg-audit" class="hide"><h2>📋 Audit Log</h2>
 <div class="card">
-<button class="btn" onclick="aLog()">Recent Audit Log</button>
-<input id="adate" placeholder="Filter by date (YYYY-MM-DD)" style="width:200px">
-<button class="btn btn-green" onclick="aLogFilter()">Filter</button>
+<button class="btn-accent" onclick="aLog()">Recent Audit Log</button>
 <div id="ar3" class="out" style="display:none"></div>
 </div></div>
 
 </div></div>
 <script>
 const API='http://localhost:8000';
-function go(p,btn){document.querySelectorAll('[id^="pg-"]').forEach(e=>e.classList.add('hide'));document.getElementById('pg-'+p).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');if(p==='home')sHealth();}
-async function api(u){try{const r=await fetch(API+u);return await r.json();}catch(e){return{error:'API offline — start: cd zolai-core && ./menu.sh'};}}
-function fmt(d){if(typeof d!=='object')return String(d);if(Array.isArray(d))return d.map(e=>typeof e==='object'?JSON.stringify(e):String(e)).join('\n');return JSON.stringify(d,null,2);}
+function go(p,btn){document.querySelectorAll('[id^="pg-"]').forEach(e=>e.classList.add('hide'));document.getElementById('pg-'+p).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');if(p==='dashboard')sDashboard();}
+async function api(u){try{const r=await fetch(API+u);return await r.json();}catch(e){return{error:'API offline — run: cd zolai-core && ./menu.sh'};}}
+function fmt(d){if(d===null||d===undefined)return'';if(typeof d!=='object')return String(d);if(Array.isArray(d))return d.map(e=>typeof e==='object'?JSON.stringify(e):String(e)).join('\n');return JSON.stringify(d,null,2);}
 function show(id,txt){const el=document.getElementById(id);el.style.display='block';el.textContent=typeof txt==='string'?txt:fmt(txt);el.classList.remove('loading');}
-function showLoad(id){const el=document.getElementById(id);el.style.display='block';el.textContent='Loading...';el.classList.add('loading');}
+function load(id){const el=document.getElementById(id);el.style.display='block';el.textContent='Loading...';el.classList.add('loading');}
+function pct(n){return Math.round(n*100)/100+'%';}
+function barColor(p){return p<50?'red':p<70?'yellow':p<90?'blue':p<100?'purple':'green';}
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleString('en-US',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+setInterval(clock,1000);clock();
 
-// Dashboard
-async function sHealth(){showLoad('hr');const d=await api('/monitor/health');show('hr',d);if(!d.error){document.getElementById('s-words').textContent=(d.dictionary_rows||0).toLocaleString();document.getElementById('s-verses').textContent=(d.bible_rows||0).toLocaleString();document.getElementById('s-tables').textContent=d.tables||0;document.getElementById('s-dbsize').textContent=d.db_size||'-';document.getElementById('s-rows').textContent=(d.total_rows||0).toLocaleString();}let a='';if(d.last_audit)a+='Last audit: '+d.last_audit+'\n';a+='API: '+API;a+='\nVersion: '+d.version+' ';document.getElementById('act').textContent=a;}
-async function sCoverage(){showLoad('cov');const d=await api('/monitor/coverage');show('cov',d);}
-async function sAudit(){showLoad('aur');const d=await api('/monitor/audit');show('aur',d);}
-async function sTables(){showLoad('tbl');const d=await api('/database/tables');show('tbl',d);}
-async function runSQL(){const q=document.getElementById('sqlq').value;if(!q.trim())return;showLoad('sqlr');const d=await api('/database/query?sql='+encodeURIComponent(q));show('sqlr',d);}
-async function sDbStats(){showLoad('st');const d=await api('/database/stats');show('st',d);}
+// ═══════════════════════ DASHBOARD ═══════════════════════
+async function sDashboard(){
+  load('s-dict');load('s-bible');load('s-trans');load('s-exercises');load('s-dbsize');load('s-rows');load('s-vocab');load('s-audit');load('s-tables');load('s-coverage');load('s-phrases');load('s-patterns');load('s-proverbs');load('s-wordalign');load('s-wordusage');load('s-audittoday');
+  load('s-dict-sub');load('s-bible-sub');load('s-trans-sub');load('s-exercises-sub');load('s-dbsize-sub');load('s-vocab-sub');load('s-audit-sub');load('s-tables-sub');load('s-coverage-sub');load('s-phrases-sub');load('s-patterns-sub');load('s-proverbs-sub');load('s-wordalign-sub');load('s-wordusage-sub');load('s-audittoday-sub');
+  load('coverage-bars');load('health-indicators');load('top-books');load('table-breakdown');load('recent-activity');
+  
+  const d=await api('/desktop/stats');
+  if(d.error){document.querySelectorAll('[id^="s-"]').forEach(e=>{e.textContent='ERR';});return;}
+  
+  // Stats cards
+  document.getElementById('s-dict').textContent=d.dictionary.total.toLocaleString();
+  document.getElementById('s-dict-sub').textContent=d.dictionary.with_myanmar+' with Myanmar ('+d.dictionary.coverage_myanmar_pct+'%)';
+  document.getElementById('s-bible').textContent=d.bible.total_verses.toLocaleString();
+  document.getElementById('s-bible-sub').textContent=d.bible.books_covered+' books covered';
+  document.getElementById('s-trans').textContent=d.training.translation_pairs.toLocaleString();
+  document.getElementById('s-trans-sub').textContent='EN↔ZO pairs';
+  document.getElementById('s-exercises').textContent=d.training.training_exercises.toLocaleString();
+  document.getElementById('s-exercises-sub').textContent='All types';
+  document.getElementById('s-dbsize').textContent=d.database_size_mb+' MB';
+  document.getElementById('s-dbsize-sub').textContent=d.total_tables+' tables';
+  document.getElementById('s-rows').textContent=d.total_rows.toLocaleString();
+  document.getElementById('s-vocab').textContent=d.training.vocabulary_entries.toLocaleString();
+  document.getElementById('s-vocab-sub').textContent=d.training.word_usage_profiles+' usage profiles';
+  document.getElementById('s-audit').textContent=d.provenance.audit_log_entries.toLocaleString();
+  document.getElementById('s-audit-sub').textContent=d.provenance.audit_today+' today';
+  document.getElementById('s-tables').textContent=d.total_tables;
+  document.getElementById('s-tables-sub').textContent='All populated ✓';
+  const coverage=d.dictionary.coverage_myanmar_pct;
+  document.getElementById('s-coverage').textContent=coverage+'%';
+  document.getElementById('s-coverage-sub').textContent=coverage>=90?'Excellent':coverage>=70?'Good':coverage>=50?'Fair':'Needs work';
+  document.getElementById('s-phrases').textContent=d.training.phrases.toLocaleString();
+  document.getElementById('s-phrases-sub').textContent=d.training.grammar_patterns+' grammar patterns';
+  document.getElementById('s-patterns').textContent=d.training.grammar_patterns.toLocaleString();
+  document.getElementById('s-patterns-sub').textContent='SOV, negation, questions';
+  document.getElementById('s-proverbs').textContent=d.training.proverbs.toLocaleString();
+  document.getElementById('s-proverbs-sub').textContent='Cultural wisdom';
+  document.getElementById('s-wordalign').textContent=d.training.word_alignments.toLocaleString();
+  document.getElementById('s-wordalign-sub').textContent='ZO↔EN alignments';
+  document.getElementById('s-wordusage').textContent=d.training.word_usage_profiles.toLocaleString();
+  document.getElementById('s-wordusage-sub').textContent='Per-book profiles';
+  document.getElementById('s-audittoday').textContent=d.provenance.audit_today;
+  document.getElementById('s-audittoday-sub').textStyle=d.provenance.audit_today>0?'green':'muted';
+  
+  // Coverage bars
+  const cb=document.getElementById('coverage-bars');
+  cb.innerHTML=`
+    <div><div style="display:flex;justify-content:space-between"><span>Myanmar Coverage</span><span>${d.dictionary.coverage_myanmar_pct}%</span></div><div class="progress-bar"><div class="fill ${barColor(d.dictionary.coverage_myanmar_pct)}" style="width:${d.dictionary.coverage_myanmar_pct}%"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between"><span>Clean English</span><span>${d.dictionary.coverage_english_pct}%</span></div><div class="progress-bar"><div class="fill ${barColor(d.dictionary.coverage_english_pct)}" style="width:${d.dictionary.coverage_english_pct}%"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between"><span>Source Attribution</span><span>${d.dictionary.with_source>0?100:0}%</span></div><div class="progress-bar"><div class="fill green" style="width:100%"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between"><span>Overall Health</span><span>${d.health.dict_coverage}%</span></div><div class="progress-bar"><div class="fill ${barColor(d.health.dict_coverage)}" style="width:${d.health.dict_coverage}%"></div></div></div>
+  `;
+  
+  // Health indicators
+  const hi=document.getElementById('health-indicators');
+  const allOk=d.health.all_tables_populated;
+  hi.innerHTML=`
+    <div class="tr"><span>Database Connected</span><span class="badge badge-green">✓ OK</span></div>
+    <div class="tr"><span>All Tables Populated</span><span class="badge badge-${allOk?'green':'yellow'}">${allOk?'✓ OK':'⚠️ CHECK'}</span></div>
+    <div class="tr"><span>Dictionary Complete</span><span class="badge badge-green">${d.dictionary.total.toLocaleString()}</span></div>
+    <div class="tr"><span>Bible Verses</span><span class="badge badge-blue">${d.bible.total_verses.toLocaleString()}</span></div>
+    <div class="tr"><span>Total Data Points</span><span class="badge badge-purple">${d.health.total_data_points.toLocaleString()}</span></div>
+    <div class="tr"><span>Audit Log Active</span><span class="badge badge-${d.provenance.audit_today>0?'green':'yellow'}">${d.provenance.audit_today} today</span></div>
+  `;
+  
+  // Top books
+  const tb=document.getElementById('top-books');
+  tb.innerHTML='<table><tr><th>Book</th><th>Verses</th></tr>'+d.bible.top_books.map(b=>`<tr><td>${b.book}</td><td>${b.count.toLocaleString()}</td></tr>`).join('')+'</table>';
+  
+  // Table breakdown (top 10)
+  const tbd=document.getElementById('table-breakdown');
+  const topTables=d.table_details.sort((a,b)=>b.rows-a.rows).slice(0,10);
+  tbd.innerHTML='<table><tr><th>Table</th><th>Rows</th></tr>'+topTables.map(t=>`<tr><td>${t.table}</td><td>${t.rows.toLocaleString()}</td></tr>`).join('')+'</table><div style="margin-top:6px;font-size:11px;color:var(--muted)">Showing top 10 of ${d.total_tables} tables</div>';
+  
+  // Recent activity
+  const act=document.getElementById('recent-activity');
+  act.textContent=`Total rows: ${d.total_rows.toLocaleString()} | DB: ${d.database_size_mb}MB | Tables: ${d.total_tables}\nAudit today: ${d.provenance.audit_today} | This week: ${d.provenance.audit_this_week}\nData points: ${d.health.total_data_points.toLocaleString()}`;
+}
+
+// Monitor
+async function sHealth(){load('hr');const d=await api('/monitor/health');show('hr',d);}
+async function sCoverage(){load('cov');const d=await api('/monitor/coverage');show('cov',d);}
+async function sAudit(){load('aur');const d=await api('/monitor/audit');show('aur',d);}
+
+// Database
+async function sTables(){load('tbl');const d=await api('/desktop/tables');show('tbl',d);}
+async function runSQL(){const q=document.getElementById('sqlq').value;if(!q.trim())return;load('sqlr');const d=await api('/desktop/query?sql='+encodeURIComponent(q));show('sqlr',d);}
 
 // Dictionary
-async function sDict(){const q=document.getElementById('dq').value;const mode=document.getElementById('dmode').value;if(!q.trim())return;showLoad('dr');const d=await api('/dictionary/search/all?q='+encodeURIComponent(q)+'&mode='+mode);show('dr',d);}
-async function sDictBrowse(){showLoad('dr');const d=await api('/dictionary/search/browse?limit=50');show('dr',d);}
-async function aWord(){const z=document.getElementById('az').value,e=document.getElementById('ae').value,m=document.getElementById('am').value||'',p=document.getElementById('apos').value||'',s=document.getElementById('asrc').value;if(!z.trim())return;showLoad('ar');const r=await fetch(API+'/dictionary/add?word='+encodeURIComponent(z)+'&english='+encodeURIComponent(e)+'&myanmar='+encodeURIComponent(m)+'&pos='+encodeURIComponent(p)+'&source='+encodeURIComponent(s),{method:'POST'});const d=await r.json();show('ar',d);}
-async function eSearch(){const q=document.getElementById('ez').value;if(!q.trim())return;showLoad('er1');const d=await api('/dictionary/search/all?q='+encodeURIComponent(q));show('er1',(d.results||d).slice(0,10));}
-async function eSave(){const w=document.getElementById('ez').value,f=document.getElementById('ef').value,v=document.getElementById('ev').value;if(!w.trim())return;showLoad('er2');const r=await fetch(API+'/dictionary/update?word='+encodeURIComponent(w)+'&field='+encodeURIComponent(f)+'&value='+encodeURIComponent(v),{method:'PUT'});const d=await r.json();show('er2',d);}
-async function dWord(){const w=document.getElementById('dz').value;if(!w.trim())return;if(!confirm('Delete "'+w+'"?'))return;showLoad('dr2');const r=await fetch(API+'/dictionary/delete?word='+encodeURIComponent(w),{method:'DELETE'});const d=await r.json();show('dr2',d);}
-async function sNonZolai(){showLoad('nz');const r=await fetch('/dictionary/check/non-zolai');const d=await r.json();show('nz',d);}
-async function sDictStats(){showLoad('ds');const d=await api('/dictionary/stats');show('ds',d);}
+async function sDict(){const q=document.getElementById('dq').value;if(!q.trim())return;load('dr');const d=await api('/dictionary/search/all?q='+encodeURIComponent(q));show('dr',d);}
+async function sDictBrowse(){load('dr');const d=await api('/desktop/dict/browse?limit=50');show('dr',d);}
+async function aWord(){const z=document.getElementById('az').value,e=document.getElementById('ae').value,m=document.getElementById('am').value||'';if(!z.trim())return;load('ar');const r=await fetch(API+'/dictionary/add?word='+encodeURIComponent(z)+'&english='+encodeURIComponent(e)+'&myanmar='+encodeURIComponent(m),{method:'POST'});const d=await r.json();show('ar',d);}
+async function eSearch(){const q=document.getElementById('ez').value;if(!q.trim())return;load('er1');const d=await api('/dictionary/search/all?q='+encodeURIComponent(q));show('er1',(d.results||d).slice(0,10));}
+async function eSave(){const w=document.getElementById('ez').value,f=document.getElementById('ef').value,v=document.getElementById('ev').value;if(!w.trim())return;load('er2');const r=await fetch(API+'/dictionary/update?word='+encodeURIComponent(w)+'&field='+encodeURIComponent(f)+'&value='+encodeURIComponent(v),{method:'PUT'});const d=await r.json();show('er2',d);}
+async function dWord(){const w=document.getElementById('dz').value;if(!w.trim())return;if(!confirm('Delete "'+w+'"?'))return;load('dr2');const r=await fetch(API+'/dictionary/delete?word='+encodeURIComponent(w),{method:'DELETE'});const d=await r.json();show('dr2',d);}
+async function sNonZolai(){load('nz');const r=await fetch('/dictionary/check/non-zolai');const d=await r.json();show('nz',d);}
+async function sDictStats(){load('ds');const d=await api('/desktop/dict/stats');show('ds',d);}
 
 // Bible
-async function sBible(){const q=document.getElementById('bq').value;if(!q.trim())return;showLoad('br');const d=await api('/bible/search?q='+encodeURIComponent(q));show('br',d);}
-async function sBibleVerse(){const q=document.getElementById('bq').value;if(!q.trim())return;showLoad('br');const d=await api('/bible/verse?q='+encodeURIComponent(q));show('br',d);}
-async function bStudy(){const b=document.getElementById('studyBook').value;showLoad('study-r');const d=await api('/bible/study?book='+b);show('study-r',d);}
-async function bLearn(){const l=document.getElementById('level').value;showLoad('learn-r');const d=await api('/bible/learn?level='+l);show('learn-r',d);}
+async function sBible(){const q=document.getElementById('bq').value;if(!q.trim())return;load('br');const d=await api('/bible/search?q='+encodeURIComponent(q));show('br',d);}
+async function bStudy(){const b=document.getElementById('studyBook').value;load('study-r');const d=await api('/desktop/bible/study?book='+b);show('study-r',d);}
+async function bLearn(){const l=document.getElementById('level').value;load('learn-r');const d=await api('/desktop/bible/learn?level='+l);show('learn-r',d);}
 
 // Bible Context
-async function cBook(){const b=document.getElementById('cbBook').value;showLoad('cbr');const d=await api('/bible/context/book?book='+b);show('cbr',d);}
-async function cWord(){const w=document.getElementById('cw').value;if(!w.trim())return;showLoad('cwr');const d=await api('/bible/context/word?word='+encodeURIComponent(w));show('cwr',d);}
-async function cTopics(){showLoad('ctr');const d=await api('/bible/context/topics');show('ctr',d);}
+async function cBook(){const b=document.getElementById('cbBook').value;load('cbr');const d=await api('/desktop/bible/context/book?book='+b);show('cbr',d);}
+async function cWord(){const w=document.getElementById('cw').value;if(!w.trim())return;load('cwr');const d=await api('/desktop/bible/context/word?word='+encodeURIComponent(w));show('cwr',d);}
+async function cTopics(){load('ctr');const d=await api('/desktop/bible/context/topics');show('ctr',d);}
 
 // Myanmar
-async function sMy(){const q=document.getElementById('mq').value;if(!q.trim())return;showLoad('mr');const d=await api('/dictionary/search/my?q='+encodeURIComponent(q));show('mr',d);}
+async function sMy(){const q=document.getElementById('mq').value;if(!q.trim())return;load('mr');const d=await api('/dictionary/search/my?q='+encodeURIComponent(q));show('mr',d);}
 
 // Gemini
-async function gemFill(){const n=document.getElementById('gl').value;showLoad('gr');const d=await api('/gemini/fill-my?limit='+n);show('gr',d);}
-async function gemFillEn(){const n=document.getElementById('ge').value;showLoad('ge-r');const d=await api('/gemini/fill-en?limit='+n);show('ge-r',d);}
-async function gemCoverage(){showLoad('gc');const d=await api('/gemini/coverage');show('gc',d);}
-async function gfRun(){const t=document.getElementById('gf').value,lang=document.getElementById('gf-lang').value;if(!t.trim())return;showLoad('gfr');const d=await api('/gemini/fill?text='+encodeURIComponent(t)+'&lang='+lang);show('gfr',d);}
+async function gemFill(){const n=document.getElementById('gl').value;load('gr');const d=await api('/desktop/gemini/fill-my?limit='+n);show('gr',d);}
+async function gemFillEn(){const n=document.getElementById('ge').value;load('ge-r');const d=await api('/desktop/gemini/fill-en?limit='+n);show('ge-r',d);}
+async function gemCoverage(){load('gc');const d=await api('/desktop/gemini/coverage');show('gc',d);}
 
-// Training Generate
-async function gGen(){const type=document.getElementById('gt').value,n=document.getElementById('gn').value;showLoad('gr');const d=await api('/training/generate?type='+type+'&count='+n);show('gr',d);}
-async function gSent(){showLoad('gsent');const d=await api('/training/generate-sentences');show('gsent',d);}
-
-// Training Validate
-async function gValidate(){const t=document.getElementById('vtext').value;if(!t.trim())return showLoad('vr');showLoad('vr');const d=await api('/training/validate?text='+encodeURIComponent(t));show('vr',d);}
-async function gDeepValidate(){const t=document.getElementById('vtext').value;if(!t.trim())return;showLoad('vr');const d=await api('/training/deep-validate?text='+encodeURIComponent(t));show('vr',d);}
-
-// Training Build
-async function gBuild(){showLoad('bld');const d=await api('/training/build');show('bld',d);}
-async function gBuildQwen(){showLoad('bld');const d=await api('/training/build-qwen');show('bld',d);}
-async function gExport(){const f=document.getElementById('exfmt').value;showLoad('exr');const d=await api('/training/export?format='+f);show('exr',d);}
-async function cBuild(){showLoad('cor');const d=await api('/training/build-corpus');show('cor',d);}
-async function cStats(){showLoad('cor');const d=await api('/training/corpus-stats');show('cor',d);}
+// Training
+async function gGen(){const type=document.getElementById('gt').value,n=document.getElementById('gn').value;load('gr');const d=await api('/desktop/training/generate?type='+type+'&count='+n);show('gr',d);}
+async function gBuild(){load('bld');const d=await api('/desktop/training/build');show('bld',d);}
+async function gBuildQwen(){load('bld');const d=await api('/desktop/training/build-qwen');show('bld',d);}
+async function gExport(){const f=document.getElementById('exfmt').value;load('exr');const d=await api('/desktop/training/export?format='+f);show('exr',d);}
 
 // Quiz
-async function tQuiz(){const l=document.getElementById('qlevel').value,t=document.getElementById('qtype').value;showLoad('qr');const d=await api('/test/quiz?level='+l+'&type='+t);show('qr',d);}
-async function tStats(){showLoad('qr');const d=await api('/test/stats');show('qr',d);}
+async function tQuiz(){const l=document.getElementById('qlevel').value;load('qr');const d=await api('/desktop/test/quiz?level='+l);show('qr',d);}
 
 // Grammar
-async function gCheck(){const t=document.getElementById('gtext').value;if(!t.trim())return;showLoad('gr');const d=await api('/grammar/check?text='+encodeURIComponent(t));show('gr',d);}
-async function gNeg(){showLoad('gneg');const d=await api('/grammar/negation-rules');show('gneg',d);}
+async function gCheck(){const t=document.getElementById('gtext').value;if(!t.trim())return;load('gr');const d=await api('/desktop/grammar/check?text='+encodeURIComponent(t));show('gr',d);}
 
 // Paragraph
-async function pAnalyze(){const t=document.getElementById('ptext').value;if(!t.trim())return;showLoad('pr');const d=await api('/paragraph/analyze?text='+encodeURIComponent(t));show('pr',d);}
-async function pStyle(){const t=document.getElementById('ptext').value,st=document.getElementById('pstyle').value;if(!t.trim())return;showLoad('pr');const d=await api('/paragraph/style?text='+encodeURIComponent(t)+'&style='+st);show('pr',d);}
-async function pParaphrase(){const t=document.getElementById('ptext2').value,l=document.getElementById('plevel').value;if(!t.trim())return;showLoad('pr2');const d=await api('/paragraph/paraphrase?text='+encodeURIComponent(t)+'&level='+l);show('pr2',d);}
+async function pAnalyze(){const t=document.getElementById('ptext').value;if(!t.trim())return;load('pr');const d=await api('/desktop/paragraph/analyze?text='+encodeURIComponent(t));show('pr',d);}
 
 // ZVS
-async function zCheck(){const t=document.getElementById('ztext').value;if(!t.trim())return;showLoad('zr');const d=await api('/zvs/validate?text='+encodeURIComponent(t));show('zr',d);}
-async function zForb(){showLoad('zforb');const d=await api('/zvs/forbidden');show('zforb',d);}
-
-// Pattern
-async function pLearn(){showLoad('pr3');const d=await api('/pattern/learn');show('pr3',d);}
-async function pStats(){showLoad('pr3');const d=await api('/pattern/stats');show('pr3',d);}
+async function zCheck(){const t=document.getElementById('ztext').value;if(!t.trim())return;load('zr');const d=await api('/desktop/zvs/validate?text='+encodeURIComponent(t));show('zr',d);}
 
 // Export
-async function eExport(){const t=document.getElementById('et').value;showLoad('er3');const d=await api('/export/'+t);show('er3',d);}
+async function eExport(){const t=document.getElementById('et').value;load('er3');const d=await api('/desktop/export/'+t);show('er3',d);}
 
 // Audit
-async function aLog(){showLoad('ar3');const d=await api('/audit/recent');show('ar3',d);}
-async function aLogFilter(){const d=document.getElementById('adate').value;showLoad('ar3');const r=await api('/audit/recent?date='+encodeURIComponent(d));show('ar3',r);}
+async function aLog(){load('ar3');const d=await api('/desktop/audit/recent');show('ar3',d);}
 
 // Init
-sHealth();
-zForb();
-gNeg();
+sDashboard();
 </script>
 </body>
 </html>

@@ -22,3 +22,8 @@ test-results/
 
 # Orchestra session-claims runtime artifact
 .pcore-claims/
+
+# Frontend build artifacts
+dist/
+out/
+*.local

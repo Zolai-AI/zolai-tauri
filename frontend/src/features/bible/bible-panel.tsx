@@ -79,7 +79,9 @@ export function BiblePanel() {
             {search.isLoading ? (
               <Skeleton className="h-32 w-full" />
             ) : (
-              <VerseList results={search.data?.results ?? []} />
+              <VerseList
+                results={Array.isArray(search.data?.results) ? search.data.results : []}
+              />
             )}
           </TabsContent>
 

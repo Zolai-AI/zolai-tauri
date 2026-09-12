@@ -82,13 +82,13 @@ export function DashboardPanel() {
           <p className="mb-2 text-sm font-medium text-foreground">Tables</p>
           {stats.data?.table_details ? (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {stats.data.table_details.map((t) => (
+              {Object.entries(stats.data.table_details).map(([name, rows]) => (
                 <div
-                  key={t.name}
+                  key={name}
                   className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-1.5 text-sm"
                 >
-                  <span className="truncate text-muted-foreground">{t.name}</span>
-                  <span className="font-mono text-foreground">{t.rows.toLocaleString()}</span>
+                  <span className="truncate text-muted-foreground">{name}</span>
+                  <span className="font-mono text-foreground">{rows.toLocaleString()}</span>
                 </div>
               ))}
             </div>

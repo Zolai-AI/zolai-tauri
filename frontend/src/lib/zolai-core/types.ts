@@ -42,11 +42,6 @@ export interface ProvenanceStats {
   audit_log_entries: number
 }
 
-export interface TableDetail {
-  name: string
-  rows: number
-}
-
 export interface StatsResponse {
   total_tables: number
   total_rows: number
@@ -55,7 +50,7 @@ export interface StatsResponse {
   bible: BibleStats
   training: TrainingStats
   provenance: ProvenanceStats
-  table_details?: TableDetail[]
+  table_details?: Record<string, number>
   [key: string]: unknown
 }
 

@@ -12,6 +12,10 @@ export function DatabasePanel() {
   const [executedSql, setExecutedSql] = useState('')
   const query = useRunQuery(executedSql || null)
 
+  const tableList = Array.isArray(tables.data?.tables) ? tables.data.tables : []
+  const columns = Array.isArray(query.data?.columns) ? query.data.columns : []
+  const rows = Array.isArray(query.data?.rows) ? query.data.rows : []
+
   return (
     <PanelShell title="Database" description="Table inventory + raw SQL explorer">
       <div className="space-y-4">
@@ -21,7 +25,7 @@ export function DatabasePanel() {
             <Skeleton className="h-24 w-full" />
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {(tables.data?.tables ?? []).map((t) => (
+              {tableList.map((t) => (
                 <div
                   key={t.name}
                   className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-1.5 text-sm"
@@ -57,15 +61,15 @@ export function DatabasePanel() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/30 text-muted-foreground">
-                    {(query.data.columns ?? []).map((c) => (
+                    {(columns).map((c) => (
                       <th key={c} className="px-2 py-1 font-medium">{c}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {(query.data.rows ?? []).slice(0, 50).map((row, i) => (
+                  {rows.slice(0, 50).map((row, i) => (
                     <tr key={i} className="border-b border-border/60 last:border-0">
-                      {(query.data.columns ?? []).map((c) => (
+                      {columns.map((c) => (
                         <td key={c} className="px-2 py-1 font-mono">{formatCell(row[c])}</td>
                       ))}
                     </tr>

@@ -9,7 +9,13 @@ export function MyanmarPanel() {
   const [q, setQ] = useState('')
   const search = useMyanmarSearch(q)
 
-  const entries = (search.data?.results ?? search.data?.rows ?? []) as Record<string, unknown>[]
+  const results = search.data?.results
+  const rows = search.data?.rows
+  const entries: Record<string, unknown>[] = Array.isArray(results)
+    ? results
+    : Array.isArray(rows)
+      ? rows
+      : []
 
   return (
     <PanelShell title="Myanmar" description="Myanmar ↔ Zolai dictionary lookup">

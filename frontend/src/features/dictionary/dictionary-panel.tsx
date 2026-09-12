@@ -109,14 +109,28 @@ export function DictionaryPanel() {
           </TabsList>
 
           <TabsContent value="results" className="pt-2">
-            {search.isLoading ? <Skeleton className="h-24 w-full" /> : <DictTable entries={search.data?.results ?? []} />}
+            {search.isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : (
+              <DictTable
+                entries={Array.isArray(search.data?.results) ? search.data.results : []}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="browse" className="pt-2">
             {browse.isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : (
-              <DictTable entries={(browse.data?.results ?? browse.data?.rows ?? []) as DictEntry[]} />
+              <DictTable
+                entries={
+                  Array.isArray(browse.data?.results)
+                    ? browse.data.results
+                    : Array.isArray(browse.data?.rows)
+                      ? browse.data.rows
+                      : []
+                }
+              />
             )}
           </TabsContent>
 

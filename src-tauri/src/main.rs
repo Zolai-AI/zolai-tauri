@@ -39,13 +39,13 @@ fn run_sidecar(program: &str, args: &[&str]) -> Result<SidecarResult, String> {
 fn default_sqlite_path() -> PathBuf {
   std::env::var("SQLITE_PATH")
     .map(PathBuf::from)
-    .unwrap_or_else(|_| PathBuf::from("data/db/zolai.sqlite3"))
+    .unwrap_or_else(|_| PathBuf::from("data/zolai.db"))
 }
 
 fn default_sqlite_vec_path() -> PathBuf {
   std::env::var("SQLITE_VEC_PATH")
     .map(PathBuf::from)
-    .unwrap_or_else(|_| PathBuf::from("desktop/src-tauri/bin/sqlite-vec"))
+    .unwrap_or_else(|_| PathBuf::from("src-tauri/bin/sqlite-vec"))
 }
 
 #[tauri::command]
@@ -418,7 +418,7 @@ mod tests {
     let saved = std::env::var("SQLITE_PATH").ok();
     std::env::remove_var("SQLITE_PATH");
     let p = default_sqlite_path();
-    assert_eq!(p, PathBuf::from("data/db/zolai.sqlite3"));
+    assert_eq!(p, PathBuf::from("data/zolai.db"));
     // Restore.
     if let Some(v) = saved {
       std::env::set_var("SQLITE_PATH", v);
@@ -432,7 +432,7 @@ mod tests {
     let p = default_sqlite_vec_path();
     assert_eq!(
       p,
-      PathBuf::from("desktop/src-tauri/bin/sqlite-vec")
+      PathBuf::from("src-tauri/bin/sqlite-vec")
     );
     if let Some(v) = saved {
       std::env::set_var("SQLITE_VEC_PATH", v);

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 
+import { PanelSkeleton } from '@/components/panel/panel-suspense'
 import { Layout } from '@/components/shell/layout'
 import { SettingsDialog } from '@/components/settings/settings-dialog'
 import { PANELS, getPanel } from '@/features'
@@ -41,7 +42,13 @@ function ZolaiStudio() {
         onRefresh={handleRefresh}
         onOpenSettings={() => setSettingsOpen(true)}
       >
-        {panel ? <panel.component /> : <p className="text-sm text-muted-foreground">Unknown panel.</p>}
+        {panel ? (
+          <Suspense fallback={<PanelSkeleton />}>
+            <panel.component />
+          </Suspense>
+        ) : (
+          <p className="text-sm text-muted-foreground">Unknown panel.</p>
+        )}
       </Layout>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

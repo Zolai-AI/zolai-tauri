@@ -18,4 +18,22 @@ export default defineConfig({
   },
   clearScreen: false,
   envPrefix: ['VITE_', 'TAURI_'],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules\/(react(-dom)?)\//, priority: 30 },
+            { name: 'query', test: /node_modules\/@tanstack\//, priority: 25 },
+            { name: 'openai', test: /node_modules\/openai\//, priority: 25 },
+            {
+              name: 'vendor-ui',
+              test: /node_modules\/(radix-ui|sonner|class-variance-authority|clsx|tailwind-merge|tw-animate-css)\//,
+              priority: 15,
+            },
+          ],
+        },
+      },
+    },
+  },
 })

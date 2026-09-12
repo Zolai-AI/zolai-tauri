@@ -4,7 +4,7 @@ use rusqlite::params;
 use serde::Serialize;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-use tauri::Manager;
+use tauri::Emitter;
 
 #[derive(Serialize)]
 struct SidecarResult {
@@ -73,8 +73,8 @@ fn run_kg_build_stream(app: tauri::AppHandle) -> Result<KgBuildStart, String> {
     {
       Ok(c) => c,
       Err(e) => {
-        let _ = app.emit_all("kg_build:log", format!("Failed to start KG build: {e}"));
-        let _ = app.emit_all(
+        let _ = app.emit("kg_build:log", format!("Failed to start KG build: {e}"));
+        let _ = app.emit(
           "kg_build:done",
           serde_json::json!({ "ok": false, "status": null }),
         );
@@ -89,7 +89,7 @@ fn run_kg_build_stream(app: tauri::AppHandle) -> Result<KgBuildStart, String> {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(out);
         for line in reader.lines().flatten() {
-          let _ = app2.emit_all("kg_build:log", line);
+          let _ = app2.emit("kg_build:log", line);
         }
       });
     }
@@ -101,14 +101,14 @@ fn run_kg_build_stream(app: tauri::AppHandle) -> Result<KgBuildStart, String> {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(err);
         for line in reader.lines().flatten() {
-          let _ = app2.emit_all("kg_build:log", line);
+          let _ = app2.emit("kg_build:log", line);
         }
       });
     }
 
     let status = child.wait().ok().and_then(|s| s.code());
     let ok = status.unwrap_or(1) == 0;
-    let _ = app.emit_all("kg_build:done", serde_json::json!({ "ok": ok, "status": status }));
+    let _ = app.emit("kg_build:done", serde_json::json!({ "ok": ok, "status": status }));
   });
 
   Ok(KgBuildStart { ok: true })

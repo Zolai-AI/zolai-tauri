@@ -14,7 +14,9 @@ anyhow = "1"
 rusqlite = { version = "0.32", features = ["bundled", "load_extension"] }
 
 [profile.release]
-lto = true
-codegen-units = 1
+# Trade a small binary-size increase for a faster release build:
+# thin LTO + more codegen units shorten the critical path for a desktop bundle.
+lto = "thin"
+codegen-units = 16
 strip = true
 

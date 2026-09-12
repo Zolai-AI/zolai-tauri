@@ -7,13 +7,13 @@
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
     "devUrl": "http://localhost:3000",
-    "frontendDist": "../website/zolai-project/out"
+    "frontendDist": "../frontend"
   },
   "app": {
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "Zolai",
+        "title": "Zolai Desktop",
         "width": 1200,
         "height": 800,
         "resizable": true,
@@ -26,13 +26,6 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "externalBin": [
-      "bin/next-server",
-      "bin/zolai-cli",
-      "bin/ollama",
-      "bin/run_api"
-    ]
+    "targets": "all"
   }
 }
-

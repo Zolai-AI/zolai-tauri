@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zolai Desktop</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+    .hdr{background:#1e293b;padding:14px 20px;border-bottom:1px solid #334155;display:flex;align-items:center;gap:10px}
+    .hdr h1{font-size:18px;color:#38bdf8}
+    .hdr span{color:#64748b;font-size:12px}
+    .wrap{display:flex;height:calc(100vh - 50px)}
+    .nav{width:190px;background:#1e293b;padding:10px;border-right:1px solid #334155}
+    .nav button{display:block;width:100%;padding:8px 10px;margin:3px 0;background:none;border:1px solid transparent;color:#94a3b8;text-align:left;border-radius:5px;cursor:pointer;font-size:13px}
+    .nav button:hover,.nav button.on{background:#334155;color:#38bdf8;border-color:#475569}
+    .main{flex:1;padding:18px;overflow-y:auto}
+    .main h2{color:#38bdf8;margin-bottom:10px;font-size:16px}
+    .card{background:#1e293b;border:1px solid #334155;border-radius:7px;padding:14px;margin-bottom:10px}
+    .card h3{color:#f1f5f9;margin-bottom:6px;font-size:13px}
+    input{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px 10px;border-radius:5px;font-size:13px;width:100%;margin-bottom:6px}
+    input:focus{outline:none;border-color:#38bdf8}
+    .btn{background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:12px;margin-right:5px}
+    .btn:hover{background:#1d4ed8}
+    .out{background:#0f172a;border:1px solid #334155;border-radius:5px;padding:10px;margin-top:8px;max-height:380px;overflow-y:auto;font-family:monospace;font-size:11px;white-space:pre-wrap}
+    .hide{display:none}
+    table{width:100%;border-collapse:collapse;margin-top:6px}
+    th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #334155;font-size:12px}
+    th{color:#94a3b8;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="hdr"><h1>🦜 Zolai Desktop</h1><span>v0.1.0</span></div>
+  <div class="wrap">
+    <div class="nav">
+      <button class="on" onclick="go('home',this)">🏠 Home</button>
+      <button onclick="go('dict',this)">📖 Dictionary</button>
+      <button onclick="go('bible',this)">📜 Bible</button>
+      <button onclick="go('my',this)">🇲🇲 Myanmar</button>
+      <button onclick="go('add',this)">➕ Add Word</button>
+      <button onclick="go('edit',this)">✏️ Edit Word</button>
+      <button onclick="go('del',this)">🗑 Delete Word</button>
+      <button onclick="go('gem',this)">🤖 Gemini</button>
+      <button onclick="go('mon',this)">💚 Monitor</button>
+    </div>
+    <div class="main">
+      <div id="pg-home"><h2>Dashboard</h2><div class="card"><h3>DB Status</h3><div id="dash">Loading...</div></div></div>
+      <div id="pg-dict" class="hide"><h2>Dictionary Search (ZO↔EN↔MY)</h2><div class="card"><input id="dq" placeholder="Type word..." onkeydown="if(event.key==='Enter')sDict()"><button class="btn" onclick="sDict()">Search</button><div id="dr" class="out" style="display:none"></div></div></div>
+      <div id="pg-bible" class="hide"><h2>Bible Search</h2><div class="card"><input id="bq" placeholder="Search verses..." onkeydown="if(event.key==='Enter')sBible()"><button class="btn" onclick="sBible()">Search</button><div id="br" class="out" style="display:none"></div></div></div>
+      <div id="pg-my" class="hide"><h2>Myanmar Dictionary</h2><div class="card"><input id="mq" placeholder="Myanmar word..." onkeydown="if(event.key==='Enter')sMy()"><button class="btn" onclick="sMy()">Search</button><div id="mr" class="out" style="display:none"></div></div></div>
+      <div id="pg-add" class="hide"><h2>Add New Word</h2><div class="card"><input id="az" placeholder="Zolai word"><input id="ae" placeholder="English meaning"><input id="am" placeholder="Myanmar (optional)"><button class="btn" onclick="aWord()">Add</button><div id="ar" class="out" style="display:none"></div></div></div>
+      <div id="pg-edit" class="hide"><h2>Edit Word</h2><div class="card"><input id="ez" placeholder="Zolai word to find"><button class="btn" onclick="eSearch()">Find</button><div id="er1" class="out" style="display:none"></div><br><input id="ef" placeholder="Field (english_clean/myanmar/pos)"><input id="ev" placeholder="New value"><button class="btn" onclick="eSave()">Save</button><div id="er2" class="out" style="display:none"></div></div></div>
+      <div id="pg-del" class="hide"><h2>Delete Word</h2><div class="card"><input id="dz" placeholder="Zolai word to delete"><button class="btn" onclick="dWord()">Delete</button><div id="dr2" class="out" style="display:none"></div></div></div>
+      <div id="pg-gem" class="hide"><h2>Gemini Translation</h2><div class="card"><h3>Fill missing Myanmar</h3><input id="gl" type="number" value="50" style="width:80px"><button class="btn" onclick="gemFill()">Run</button><div id="gr" class="out" style="display:none"></div></div></div>
+      <div id="pg-mon" class="hide"><h2>System Monitor</h2><div class="card"><button class="btn" onclick="sHealth()">Refresh</button><div id="hr" class="out" style="display:none"></div></div></div>
+    </div>
+  </div>
+  <script>
+    const API='http://localhost:8000';
+    function go(p,btn){document.querySelectorAll('[id^="pg-"]').forEach(e=>e.classList.add('hide'));document.getElementById('pg-'+p).classList.remove('hide');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(p==='home')sHealth();}
+    async function api(u){try{const r=await fetch(API+u);return await r.json();}catch(e){return{error:'API offline — run: cd zolai-core && python -m uvicorn zolai.api.server:app --port 8000'};}}
+    async function sHealth(){const el=document.getElementById('hr');el.style.display='block';el.textContent='Loading...';const d=await api('/monitor/health');el.textContent=JSON.stringify(d,null,2);const dk=document.getElementById('dash');if(!d.error){let h='';for(const[k,v]of Object.entries(d)){if(typeof v==='number')h+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #334155"><span>'+k+'</span><span style="color:#38bdf8">'+v.toLocaleString()+'</span></div>';}dk.innerHTML=h||'No data';}else dk.innerHTML='<span style="color:#f87171">'+d.error+'</span>';}
+    async function sDict(){const q=document.getElementById('dq').value;const el=document.getElementById('dr');el.style.display='block';el.textContent='Searching...';const d=await api('/dictionary/search/all?q='+encodeURIComponent(q));if(d.error){el.textContent=d.error;return;}const r=d.results||d;el.textContent=r.slice(0,30).map(e=>e.zolai+' → '+(e.english_clean||e.english||'')+(e.myanmar?'  MY: '+e.myanmar:'')).join('\n');}
+    async function sBible(){const q=document.getElementById('bq').value;const el=document.getElementById('br');el.style.display='block';el.textContent='Searching...';const d=await api('/bible/search?q='+encodeURIComponent(q));if(d.error){el.textContent=d.error;return;}const r=d.results||d;el.textContent=r.slice(0,20).map(e=>e.ref+': '+e.zo_tdb77).join('\n\n');}
+    async function sMy(){const q=document.getElementById('mq').value;const el=document.getElementById('mr');el.style.display='block';el.textContent='Searching...';const d=await api('/dictionary/search/my?q='+encodeURIComponent(q));el.textContent=JSON.stringify(d,null,2);}
+    async function aWord(){const z=document.getElementById('az').value,e=document.getElementById('ae').value,m=document.getElementById('am').value;const el=document.getElementById('ar');el.style.display='block';el.textContent='Adding...';const r=await fetch(API+'/dictionary/add?word='+encodeURIComponent(z)+'&english='+encodeURIComponent(e)+'&myanmar='+encodeURIComponent(m),{method:'POST'});const d=await r.json();el.textContent=JSON.stringify(d,null,2);}
+    async function eSearch(){const q=document.getElementById('ez').value;const el=document.getElementById('er1');el.style.display='block';el.textContent='Finding...';const d=await api('/dictionary/search/all?q='+encodeURIComponent(q));el.textContent=JSON.stringify((d.results||d).slice(0,10),null,2);}
+    async function eSave(){const w=document.getElementById('ez').value,f=document.getElementById('ef').value,v=document.getElementById('ev').value;const el=document.getElementById('er2');el.style.display='block';el.textContent='Saving...';const r=await fetch(API+'/dictionary/update?word='+encodeURIComponent(w)+'&field='+encodeURIComponent(f)+'&value='+encodeURIComponent(v),{method:'PUT'});const d=await r.json();el.textContent=JSON.stringify(d,null,2);}
+    async function dWord(){const w=document.getElementById('dz').value;const el=document.getElementById('dr2');el.style.display='block';if(!confirm('Delete "'+w+'"?'))return;el.textContent='Deleting...';const r=await fetch(API+'/dictionary/delete?word='+encodeURIComponent(w),{method:'DELETE'});const d=await r.json();el.textContent=JSON.stringify(d,null,2);}
+    function gemFill(){const n=document.getElementById('gl').value;const el=document.getElementById('gr');el.style.display='block';el.textContent='Run in terminal:\ncd zolai-datasets && python3 scripts/my/gemini_translate.py --fill-my --limit '+n;}
+    sHealth();
+  </script>
+</body>
+</html>

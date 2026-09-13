@@ -1,4 +1,5 @@
-import { Settings } from 'lucide-react'
+import { Moon, Settings, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +14,8 @@ interface TopbarProps {
 
 /** Top bar: connection indicator (live dot ↔ automatic refresh) + settings button. */
 export function Topbar({ connected, refreshing, onRefresh, onOpenSettings }: TopbarProps) {
+  const { theme, setTheme } = useTheme()
+
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card px-4">
       <div className="flex items-center gap-2">
@@ -39,6 +42,15 @@ export function Topbar({ connected, refreshing, onRefresh, onOpenSettings }: Top
           title="Refresh all data"
         >
           {refreshing ? '…' : 'Refresh'}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          title="Toggle theme"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </Button>
         <Button
           variant="ghost"

@@ -6,7 +6,7 @@ export function RunScriptBlock({ result }: { result?: RunScriptResult | null }) 
   if (!result) return null
   if ('error' in result && result.error) {
     return (
-      <pre className="whitespace-pre-wrap rounded-lg border border-red-500/30 bg-red-500/10 p-3 font-mono text-sm text-red-300">
+      <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-red-500/30 bg-red-500/10 p-3 font-mono text-sm text-red-300">
         {result.error}
       </pre>
     )
@@ -18,7 +18,7 @@ export function RunScriptBlock({ result }: { result?: RunScriptResult | null }) 
           ✓ success
         </Badge>
         {result.output ? (
-          <pre className="whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-3 font-mono text-sm">
+          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-3 font-mono text-sm">
             {result.output}
           </pre>
         ) : null}
@@ -27,7 +27,7 @@ export function RunScriptBlock({ result }: { result?: RunScriptResult | null }) 
   }
   if ('output' in result && result.output) {
     return (
-      <pre className="whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-3 font-mono text-sm">
+      <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/40 p-3 font-mono text-sm">
         {result.output}
       </pre>
     )

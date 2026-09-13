@@ -35,11 +35,11 @@ export function PanelShell({ title, description, actions, children, scroll = tru
         </div>
       </CardHeader>
       {scroll ? (
-        <ScrollArea className="flex-1">
-          <div className="flex h-full min-h-0 flex-col">{body}</div>
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="flex min-h-0 flex-col">{body}</div>
         </ScrollArea>
       ) : (
-        <div className="flex h-full min-h-0 flex-col overflow-hidden">{body}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{body}</div>
       )}
     </Card>
   )

@@ -1,5 +1,69 @@
 import { z } from 'zod'
 
+/** Available provider IDs. */
+export type ProviderId = 'openai' | 'gemini' | 'anthropic' | 'ollama' | 'openrouter' | 'custom'
+
+/** Ollama local base URL. */
+export const OLLAMA_BASE_URL = 'http://localhost:11434'
+
+/** Model presets keyed by provider. */
+export const MODEL_PRESETS: Record<
+  string,
+  { models: string[]; default: string; needsKey: boolean; label: string }
+> = {
+  gemini: {
+    label: 'Google Gemini (Local WebAPI)',
+    models: [
+      'gemini-3-flash',
+      'gemini-3-flash-thinking',
+      'gemini-3-pro',
+      'gemini-3-pro-plus',
+      'gemini-3-flash-plus',
+      'gemini-3-flash-thinking-plus',
+      'gemini-3-pro-advanced',
+      'gemini-3-flash-advanced',
+      'gemini-3-flash-thinking-advanced',
+    ],
+    default: 'gemini-3-flash',
+    needsKey: false,
+  },
+  openai: {
+    label: 'OpenAI',
+    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1'],
+    default: 'gpt-4o-mini',
+    needsKey: true,
+  },
+  anthropic: {
+    label: 'Anthropic',
+    models: ['claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'],
+    default: 'claude-sonnet-4-20250514',
+    needsKey: true,
+  },
+  ollama: {
+    label: 'Ollama (Local)',
+    models: [],
+    default: 'qwen3:4b',
+    needsKey: false,
+  },
+  openrouter: {
+    label: 'OpenRouter (Free Models)',
+    models: [
+      'mimo-v2.5-free',
+      'nemotron-3-ultra-free',
+      'hy3-free',
+      'muse-spark-1.2-contributor-free',
+    ],
+    default: 'mimo-v2.5-free',
+    needsKey: true,
+  },
+  custom: {
+    label: 'Custom (OpenAI-compatible)',
+    models: [],
+    default: 'gpt-4o-mini',
+    needsKey: true,
+  },
+}
+
 /** zod schema for user-persisted app settings (localStorage key `zolai_settings`). */
 export const SettingsSchema = z.object({
   /** Full base URL of the local zolai-core FastAPI, e.g. http://localhost:8000 */
@@ -23,9 +87,9 @@ const STORAGE_KEY = 'zolai_settings'
 export const DEFAULT_SETTINGS: Settings = {
   baseUrl: 'http://localhost:8000',
   port: 8000,
-  provider: 'openai',
+  provider: 'gemini',
   apiKey: '',
-  model: 'gpt-4o-mini',
+  model: 'gemini-3-flash',
   zolaiMode: true,
 }
 
@@ -59,4 +123,23 @@ export function portFromBaseUrl(baseUrl: string): number | null {
     /* ignore malformed */
   }
   return null
+}
+
+/** Read the env-var API key for a given provider, or null. */
+export function getEnvApiKey(provider: string): string | null {
+  if (typeof window === 'undefined') return null
+  const key = `VITE_${provider.toUpperCase()}_API_KEY`
+  return import.meta.env[key] || null
+}
+
+/** Fetch available model names from a local Ollama instance. */
+export async function fetchOllamaModels(baseUrl = OLLAMA_BASE_URL): Promise<string[]> {
+  try {
+    const res = await fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.models ?? []).map((m: { name: string }) => m.name)
+  } catch {
+    return []
+  }
 }

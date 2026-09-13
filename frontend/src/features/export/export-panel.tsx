@@ -27,11 +27,10 @@ export function ExportPanel() {
     },
   ]
   return (
-    <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">
-        Types: {EXPORT_TYPES.join(' · ')}
-      </p>
-      <ScriptPanel title="Export" description="Export processed datasets to JSONL" actions={actions} />
-    </div>
+    <ScriptPanel
+      title="Export"
+      description={`Export processed datasets to JSONL · Types: ${EXPORT_TYPES.join(' · ')}`}
+      actions={actions}
+    />
   )
 }

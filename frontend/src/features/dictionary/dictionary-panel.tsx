@@ -13,6 +13,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   useAddDict,
   useDeleteDict,
@@ -26,27 +27,27 @@ import type { DictEntry, RunScriptResult } from '@/lib/zolai-core/types'
 function DictTable({ entries }: { entries: DictEntry[] }) {
   if (entries.length === 0) return <p className="text-sm text-muted-foreground">No results.</p>
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-            <th className="py-1 pr-2">Zolai</th>
-            <th className="py-1 pr-2">English</th>
-            <th className="py-1 pr-2">Myanmar</th>
-            <th className="py-1">POS</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="max-h-96 overflow-auto rounded-md border border-border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Zolai</TableHead>
+            <TableHead>English</TableHead>
+            <TableHead>Myanmar</TableHead>
+            <TableHead>POS</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {entries.map((e, i) => (
-            <tr key={i} className="border-b border-border/60 last:border-0">
-              <td className="py-1.5 pr-2 font-medium text-foreground">{e.zolai ?? e.word ?? e.key ?? ''}</td>
-              <td className="py-1.5 pr-2 text-muted-foreground">{e.english ?? '—'}</td>
-              <td className="py-1.5 pr-2 text-muted-foreground">{e.myanmar ?? '—'}</td>
-              <td className="py-1.5">{e.pos ? <Badge variant="outline">{e.pos}</Badge> : '—'}</td>
-            </tr>
+            <TableRow key={i}>
+              <TableCell className="font-medium">{e.zolai ?? e.word ?? e.key ?? ''}</TableCell>
+              <TableCell className="text-muted-foreground">{e.english ?? '—'}</TableCell>
+              <TableCell className="text-muted-foreground">{e.myanmar ?? '—'}</TableCell>
+              <TableCell>{e.pos ? <Badge variant="outline">{e.pos}</Badge> : '—'}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }

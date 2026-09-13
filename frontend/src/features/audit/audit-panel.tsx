@@ -2,6 +2,7 @@ import { PanelShell } from '@/components/panel/panel-shell'
 import { RunScriptBlock } from '@/components/panel/run-script-block'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAuditRecent, useMonitorAudit } from '@/lib/zolai-core/hooks'
 
 export function AuditPanel() {
@@ -28,31 +29,31 @@ export function AuditPanel() {
           ) : auditRows.length === 0 ? (
             <p className="text-sm text-muted-foreground">No audit entries.</p>
           ) : (
-            <div className="overflow-x-auto rounded-md border border-border">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30 text-muted-foreground">
-                    <th className="px-2 py-1">Action</th>
-                    <th className="px-2 py-1">Table</th>
-                    <th className="px-2 py-1">Entity</th>
-                    <th className="px-2 py-1">Detail</th>
-                    <th className="px-2 py-1">When</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="max-h-96 overflow-auto rounded-md border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Table</TableHead>
+                    <TableHead>Entity</TableHead>
+                    <TableHead>Detail</TableHead>
+                    <TableHead>When</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {auditRows.map((e, i) => (
-                    <tr key={i} className="border-b border-border/60 last:border-0">
-                      <td className="px-2 py-1">
+                    <TableRow key={i}>
+                      <TableCell>
                         <Badge variant="outline" className="text-[10px]">{e.action ?? ''}</Badge>
-                      </td>
-                      <td className="px-2 py-1 font-mono">{e.table_name}</td>
-                      <td className="px-2 py-1">{e.entity}</td>
-                      <td className="max-w-[16rem] truncate px-2 py-1 text-muted-foreground">{e.detail ?? ''}</td>
-                      <td className="px-2 py-1 text-muted-foreground">{e.changed_at}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="font-mono">{e.table_name}</TableCell>
+                      <TableCell>{e.entity}</TableCell>
+                      <TableCell className="max-w-[16rem] truncate text-muted-foreground">{e.detail ?? ''}</TableCell>
+                      <TableCell className="text-muted-foreground">{e.changed_at}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

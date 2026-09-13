@@ -4,6 +4,7 @@ import { PanelShell } from '@/components/panel/panel-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCompact } from '@/components/panel/format'
 import { useRunQuery, useTables } from '@/lib/zolai-core/hooks'
 
@@ -58,25 +59,25 @@ export function DatabasePanel() {
           {query.isFetching ? (
             <Skeleton className="h-40 w-full" />
           ) : query.data ? (
-            <div className="overflow-x-auto rounded-md border border-border">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30 text-muted-foreground">
+            <div className="max-h-96 overflow-auto rounded-md border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
                     {(columns).map((c) => (
-                      <th key={c} className="px-2 py-1 font-medium">{c}</th>
+                      <TableHead key={c}>{c}</TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {rows.slice(0, 50).map((row, i) => (
-                    <tr key={i} className="border-b border-border/60 last:border-0">
+                    <TableRow key={i}>
                       {columns.map((c) => (
-                        <td key={c} className="px-2 py-1 font-mono">{formatCell(row[c])}</td>
+                        <TableCell key={c} className="font-mono">{formatCell(row[c])}</TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">Run a read-only query (e.g. SELECT) to inspect data.</p>

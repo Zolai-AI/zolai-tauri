@@ -1,5 +1,6 @@
 import { Suspense, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
 
 import { PanelSkeleton } from '@/components/panel/panel-suspense'
@@ -52,7 +53,7 @@ function ZolaiStudio() {
       </Layout>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster position="bottom-right" />
     </>
   )
 }
@@ -60,7 +61,9 @@ function ZolaiStudio() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ZolaiStudio />
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <ZolaiStudio />
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

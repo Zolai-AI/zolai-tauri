@@ -179,14 +179,9 @@ export function BiblePanel() {
     }
   }
 
-  // Quick verse presets
-  const quickVerses = [
-    { label: 'All', value: 'all' },
-    { label: '1', value: '1' },
-    { label: '1–5', value: '1-5' },
-    { label: '1–10', value: '1-10' },
-    { label: '1–20', value: '1-20' },
-  ]
+  // Dynamic verse count from chapter data
+  const currentChapterData = chapters.find((c) => c.chapter === selectedChapter)
+  const totalVerses = currentChapterData?.verses ?? 0
 
   // Current verse dropdown value
   const currentVerseVal = verseStart != null && verseEnd != null
@@ -297,9 +292,9 @@ export function BiblePanel() {
                 <SelectValue placeholder="Verse…" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {quickVerses.filter((v) => v.value !== 'all').map((v) => (
-                  <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                <SelectItem value="all">All ({totalVerses})</SelectItem>
+                {Array.from({ length: totalVerses }, (_, i) => i + 1).map((v) => (
+                  <SelectItem key={v} value={String(v)}>{v}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

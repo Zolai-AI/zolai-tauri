@@ -19,6 +19,8 @@ import type {
   QueryResponse,
   RunScriptResult,
   StatsResponse,
+  TableDataResponse,
+  TableSchemaResponse,
   TablesResponse,
 } from './types'
 
@@ -63,6 +65,42 @@ export function useRunQuery(sql: string | null): UseQueryResult<QueryResponse, E
     queryKey: ['query', sql],
     queryFn: () => client.getJson<QueryResponse>(ROUTES.query.path, { sql: sql ?? '' }),
     enabled: !!sql,
+    ...defaultQueryOptions,
+  })
+}
+
+/** GET /desktop/table-data — paginated table rows with optional sorting. */
+export function useTableData(
+  tableName: string | null,
+  page: number,
+  pageSize: number,
+  sortBy?: string,
+  sortDir: 'asc' | 'desc' = 'asc',
+): UseQueryResult<TableDataResponse, Error> {
+  return useQuery({
+    queryKey: ['table-data', tableName, page, pageSize, sortBy, sortDir],
+    queryFn: () =>
+      client.getJson<TableDataResponse>(ROUTES.tableData.path, {
+        table: tableName ?? '',
+        page,
+        page_size: pageSize,
+        sort_by: sortBy,
+        sort_dir: sortDir,
+      }),
+    enabled: !!tableName,
+    ...defaultQueryOptions,
+  })
+}
+
+/** GET /desktop/table-schema — column info for a table. */
+export function useTableSchema(tableName: string | null): UseQueryResult<TableSchemaResponse, Error> {
+  return useQuery({
+    queryKey: ['table-schema', tableName],
+    queryFn: () =>
+      client.getJson<TableSchemaResponse>(ROUTES.tableSchema.path, {
+        table: tableName ?? '',
+      }),
+    enabled: !!tableName,
     ...defaultQueryOptions,
   })
 }

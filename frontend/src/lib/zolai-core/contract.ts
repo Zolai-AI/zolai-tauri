@@ -50,6 +50,8 @@ export const ROUTES = {
   paragraph: { method: METHOD.GET, path: '/desktop/paragraph/analyze' },
   zvs: { method: METHOD.GET, path: '/desktop/zvs/validate' },
   auditRecent: { method: METHOD.GET, path: '/desktop/audit/recent' },
+  tableData: { method: METHOD.GET, path: '/desktop/table-data' },
+  tableSchema: { method: METHOD.GET, path: '/desktop/table-schema' },
 
   // ---- Application router -------------------------------------------------
   bibleSearch: { method: METHOD.GET, path: '/bible/search' },

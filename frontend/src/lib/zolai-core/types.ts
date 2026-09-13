@@ -173,3 +173,30 @@ export interface ChatMessageRole {
   role: 'user' | 'assistant' | 'system'
   content: string
 }
+
+// ---- Table Data (Prisma Studio-like browser) ------------------------------
+export interface TableDataResponse {
+  table: string
+  columns: string[]
+  rows: Array<Record<string, unknown>>
+  total_rows: number
+  page: number
+  page_size: number
+  total_pages: number
+  error?: string
+}
+
+export interface TableColumn {
+  cid: number
+  name: string
+  type: string
+  notnull: boolean
+  default_value: string | null
+  pk: boolean
+}
+
+export interface TableSchemaResponse {
+  table: string
+  columns: TableColumn[]
+  error?: string
+}

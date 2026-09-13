@@ -123,6 +123,38 @@ export interface BibleSearchResponse {
   [key: string]: unknown
 }
 
+// ---- Bible Navigation -----------------------------------------------------
+export interface BibleBook {
+  abbr: string
+  name: string
+  verses: number
+  min_chapter: number
+  max_chapter: number
+}
+
+export interface BibleBookChapter {
+  chapter: number
+  verses: number
+}
+
+export interface BibleVerseParallel {
+  verse: number
+  zo_tdb77: string
+  zo_tedim2010: string
+  en_kJV: string
+  myanmar: string
+  book_name: string
+}
+
+export interface GeminiCoverageResponse {
+  total: number
+  with_english: number
+  with_myanmar: number
+  english_pct: number
+  myanmar_pct: number
+  error?: string
+}
+
 // ---- Monitor --------------------------------------------------------------
 export interface MonitorHealthResponse {
   status?: string

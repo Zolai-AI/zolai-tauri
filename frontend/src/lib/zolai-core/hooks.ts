@@ -8,12 +8,16 @@ import * as client from './client'
 import { ROUTES, type ExportDataType } from './contract'
 import type {
   AuditEntry,
+  BibleBook,
+  BibleBookChapter,
   BibleSearchResponse,
+  BibleVerseParallel,
   ChatZolaiResponse,
   CoverageResponse,
   DictDenormalized,
   DictEntry,
   DictSearchResponse,
+  GeminiCoverageResponse,
   HealthResponse,
   MonitorHealthResponse,
   QueryResponse,
@@ -289,6 +293,33 @@ export function useBibleTopics(): UseMutationResult<RunScriptResult, Error, void
   })
 }
 
+// ---- Bible navigation hooks -----------------------------------------------
+export function useBibleBooks(): UseQueryResult<{ books: BibleBook[]; total: number }, Error> {
+  return useQuery({
+    queryKey: ['bible', 'books'],
+    queryFn: () => client.getJson<{ books: BibleBook[]; total: number }>(ROUTES.bibleBooks.path),
+    ...defaultQueryOptions,
+  })
+}
+
+export function useBibleChapters(book: string | null): UseQueryResult<{ chapters: BibleBookChapter[]; total: number }, Error> {
+  return useQuery({
+    queryKey: ['bible', 'chapters', book],
+    queryFn: () => client.getJson<{ chapters: BibleBookChapter[]; total: number }>(ROUTES.bibleChapters.path, { book: book ?? '' }),
+    enabled: !!book,
+    ...defaultQueryOptions,
+  })
+}
+
+export function useBibleVerses(book: string | null, chapter: number | null): UseQueryResult<{ verses: BibleVerseParallel[]; book_name: string }, Error> {
+  return useQuery({
+    queryKey: ['bible', 'verses', book, chapter],
+    queryFn: () => client.getJson<{ verses: BibleVerseParallel[]; book_name: string }>(ROUTES.bibleVerses.path, { book: book ?? '', chapter: chapter ?? 1 }),
+    enabled: !!book && chapter !== null,
+    ...defaultQueryOptions,
+  })
+}
+
 // ---- gemini mutations ------------------------------------------------------
 export function useGeminiFillEn(): UseMutationResult<RunScriptResult, Error, { limit: number; provider?: string; model?: string }> {
   return useMutation({
@@ -312,8 +343,8 @@ export function useGeminiFillMy(): UseMutationResult<RunScriptResult, Error, { l
   })
 }
 
-export function useGeminiCoverage(): UseQueryResult<RunScriptResult, Error> {
-  return useQuery({ queryKey: ['gemini', 'coverage'], queryFn: () => client.getJson<RunScriptResult>(ROUTES.geminiCoverage.path), ...defaultQueryOptions })
+export function useGeminiCoverage(): UseQueryResult<GeminiCoverageResponse, Error> {
+  return useQuery({ queryKey: ['gemini', 'coverage'], queryFn: () => client.getJson<GeminiCoverageResponse>(ROUTES.geminiCoverage.path), ...defaultQueryOptions })
 }
 
 // ---- training mutations ----------------------------------------------------

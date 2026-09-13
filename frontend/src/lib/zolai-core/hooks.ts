@@ -311,10 +311,20 @@ export function useBibleChapters(book: string | null): UseQueryResult<{ chapters
   })
 }
 
-export function useBibleVerses(book: string | null, chapter: number | null): UseQueryResult<{ verses: BibleVerseParallel[]; book_name: string }, Error> {
+export function useBibleVerses(
+  book: string | null,
+  chapter: number | null,
+  verseStart?: number | null,
+  verseEnd?: number | null,
+): UseQueryResult<{ verses: BibleVerseParallel[]; book_name: string }, Error> {
   return useQuery({
-    queryKey: ['bible', 'verses', book, chapter],
-    queryFn: () => client.getJson<{ verses: BibleVerseParallel[]; book_name: string }>(ROUTES.bibleVerses.path, { book: book ?? '', chapter: chapter ?? 1 }),
+    queryKey: ['bible', 'verses', book, chapter, verseStart, verseEnd],
+    queryFn: () => {
+      const params: Record<string, string | number> = { book: book ?? '', chapter: chapter ?? 1 }
+      if (verseStart != null) params.verse_start = verseStart
+      if (verseEnd != null) params.verse_end = verseEnd
+      return client.getJson<{ verses: BibleVerseParallel[]; book_name: string }>(ROUTES.bibleVerses.path, params)
+    },
     enabled: !!book && chapter !== null,
     ...defaultQueryOptions,
   })

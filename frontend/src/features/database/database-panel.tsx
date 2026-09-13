@@ -20,8 +20,14 @@ import {
   useTableSchema,
   useTables,
 } from '@/lib/zolai-core/hooks'
+import type { TableRow as TableInfo } from '@/lib/zolai-core/types'
 
 const PAGE_SIZE = 25
+
+/** Resolve table name from either `name` or `table_name` field. */
+function tableName(t: TableInfo): string {
+  return t.name ?? t.table_name ?? 'unknown'
+}
 
 export function DatabasePanel() {
   const tables = useTables()
@@ -88,22 +94,25 @@ export function DatabasePanel() {
               </div>
             ) : (
               <div className="py-1">
-                {tableList.map((t) => (
-                  <button
-                    key={t.name}
-                    onClick={() => selectTable(t.name)}
-                    className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-sm transition-colors
-                      ${activeTable === t.name
-                        ? 'bg-primary/10 text-foreground font-medium'
-                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                      }`}
-                  >
-                    <span className="truncate">{t.name}</span>
-                    <span className="ml-2 shrink-0 font-mono text-xs text-muted-foreground">
-                      {formatCompact(t.rows)}
-                    </span>
-                  </button>
-                ))}
+                {tableList.map((t) => {
+                  const name = tableName(t)
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => selectTable(name)}
+                      className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-sm transition-colors
+                        ${activeTable === name
+                          ? 'bg-primary/10 text-foreground font-medium'
+                          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                        }`}
+                    >
+                      <span className="truncate">{name}</span>
+                      <span className="ml-2 shrink-0 font-mono text-xs text-muted-foreground">
+                        {formatCompact(t.rows)}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>

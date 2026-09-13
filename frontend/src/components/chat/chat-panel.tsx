@@ -157,6 +157,18 @@ export function ChatPanel() {
                 streaming={busy && i === messages.length - 1 && m.role === 'assistant'}
               />
             ))}
+            {/* Typing indicator */}
+            {busy &&
+              messages.length > 0 &&
+              messages[messages.length - 1]?.role === 'assistant' &&
+              !messages[messages.length - 1]?.content && (
+                <div className="flex items-center gap-1.5 px-4 text-muted-foreground">
+                  <span className="inline-block size-1.5 rounded-full bg-current [animation:typing-bounce_1s_infinite_0ms]" />
+                  <span className="inline-block size-1.5 rounded-full bg-current [animation:typing-bounce_1s_infinite_150ms]" />
+                  <span className="inline-block size-1.5 rounded-full bg-current [animation:typing-bounce_1s_infinite_300ms]" />
+                  <span className="ml-1 text-xs">Thinking...</span>
+                </div>
+              )}
           </div>
         )}
       </div>

@@ -152,6 +152,12 @@ body,
   height: 100%;
 }
 
+/* Typing indicator bounce animation */
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
 body {
   margin: 0;
   background-color: var(--background);

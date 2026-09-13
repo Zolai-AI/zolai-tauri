@@ -56,7 +56,9 @@ export interface StatsResponse {
 
 // ---- Tables ---------------------------------------------------------------
 export interface TableRow {
-  name: string
+  /** Primary table name — backend may return either `name` or `table_name`. */
+  name?: string
+  table_name?: string
   rows: number
 }
 

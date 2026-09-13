@@ -78,14 +78,35 @@ async function chatStreamZolai(
   messages: ChatMessageRole[],
   onToken: (token: string) => void,
 ): Promise<void> {
+  const settings = loadSettings()
   const lastUser = [...messages].reverse().find((m) => m.role === 'user')
   const message = lastUser?.content ?? ''
 
   try {
-    const data = await postJson<{ zolai_response: string }>(ROUTES.chatZolai.path, { message })
+    const data = await postJson<{ zolai_response: string; error?: string }>(
+      ROUTES.chatZolai.path,
+      {
+        message,
+        model: settings.model,
+        session_id: 'desktop-' + Date.now(),
+      },
+    )
+
+    // Check for error in response body
+    if (data.error) {
+      throw new ChatProviderError(data.error)
+    }
+
     const text = data.zolai_response ?? ''
-    if (text) onToken(text)
+    if (text) {
+      onToken(text)
+    } else {
+      throw new ChatProviderError(
+        'Empty response from Zolai chat. Is the backend running with the correct model?',
+      )
+    }
   } catch (cause) {
+    if (cause instanceof ChatProviderError) throw cause
     throw new ChatProviderError(`Zolai chat failed: ${String(cause)}`)
   }
 }

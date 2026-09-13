@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 import { PanelShell } from '@/components/panel/panel-shell'
 import { Button } from '@/components/ui/button'
@@ -27,15 +27,6 @@ const LANGUAGES: { key: LanguageKey; label: string; short: string }[] = [
   { key: 'myanmar', label: 'Myanmar', short: 'MY' },
 ]
 
-const VERSE_RANGES = [
-  { label: 'All verses', start: null, end: null },
-  { label: '1\u20135', start: 1, end: 5 },
-  { label: '1\u201310', start: 1, end: 10 },
-  { label: '1\u201320', start: 1, end: 20 },
-  { label: '1\u201350', start: 1, end: 50 },
-]
-
-// NT book abbreviations for section splitting
 const NT_ABBRS = new Set([
   'MAT', 'MRK', 'LUK', 'JHN', 'ACT', 'ROM', '1CO', '2CO',
   'GAL', 'EPH', 'PHI', 'COL', '1TH', '2TH', '1TI', '2TI',
@@ -43,16 +34,36 @@ const NT_ABBRS = new Set([
   '3JN', 'JUD', 'REV',
 ])
 
+/** Parse a reference string like "GEN 1:1-5" or "1CH 3" */
+function parseRef(input: string): { book: string; chapter: number; verseStart: number | null; verseEnd: number | null } | null {
+  const m = input.trim().match(/^(\d?[A-Z]{2,3})\s+(\d+)(?::(\d+)(?:-(\d+))?)?$/i)
+  if (!m) return null
+  const book = m[1].toUpperCase()
+  const chapter = Number(m[2])
+  const verseStart = m[3] ? Number(m[3]) : null
+  const verseEnd = m[4] ? Number(m[4]) : (m[3] ? Number(m[3]) : null)
+  return { book, chapter, verseStart, verseEnd }
+}
+
+/** Build a reference string from parts */
+function buildRef(book: string, chapter: number | null, verseStart: number | null, verseEnd: number | null): string {
+  if (!book) return ''
+  if (!chapter) return book
+  if (verseStart != null && verseEnd != null && verseStart !== verseEnd) {
+    return `${book} ${chapter}:${verseStart}-${verseEnd}`
+  }
+  if (verseStart != null) {
+    return `${book} ${chapter}:${verseStart}`
+  }
+  return `${book} ${chapter}`
+}
+
 function VerseDisplay({
   verses,
   visibleLangs,
-  selectedVerse,
-  onSelectVerse,
 }: {
   verses: BibleVerseParallel[]
   visibleLangs: Set<LanguageKey>
-  selectedVerse: number | null
-  onSelectVerse: (v: number) => void
 }) {
   if (verses.length === 0) {
     return <p className="text-sm text-muted-foreground">No verses found.</p>
@@ -62,12 +73,7 @@ function VerseDisplay({
       {verses.map((v) => (
         <div
           key={v.verse}
-          onClick={() => onSelectVerse(v.verse)}
-          className={`rounded-md border p-2 text-sm cursor-pointer transition-colors ${
-            selectedVerse === v.verse
-              ? 'border-primary bg-primary/10'
-              : 'border-border bg-muted/20 hover:bg-muted/40'
-          }`}
+          className="rounded-md border border-border bg-muted/20 p-2 text-sm"
         >
           <p className="text-xs font-medium text-primary">
             {v.book_name} {v.verse}
@@ -91,36 +97,101 @@ function VerseDisplay({
 }
 
 export function BiblePanel() {
-  const [q, setQ] = useState('')
-  const [selectedBook, setSelectedBook] = useState<string | null>(null)
-  const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
-  const [verseRange, setVerseRange] = useState<number>(0) // index into VERSE_RANGES
-  const [customStart, setCustomStart] = useState('')
-  const [customEnd, setCustomEnd] = useState('')
-  const [selectedVerse, setSelectedVerse] = useState<number | null>(null)
+  const [refInput, setRefInput] = useState('GEN 1')
+  const [selectedBook, setSelectedBook] = useState<string | null>('GEN')
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(1)
+  const [verseStart, setVerseStart] = useState<number | null>(null)
+  const [verseEnd, setVerseEnd] = useState<number | null>(null)
+  const [searchQ, setSearchQ] = useState('')
   const [visibleLangs, setVisibleLangs] = useState<Set<LanguageKey>>(
     new Set(['zo_tdb77', 'en_kJV']),
   )
 
   const booksQuery = useBibleBooks()
   const chaptersQuery = useBibleChapters(selectedBook)
-
-  const isCustomRange = verseRange === VERSE_RANGES.length
-  const range = isCustomRange ? null : VERSE_RANGES[verseRange]
-  const verseStart = isCustomRange
-    ? Number(customStart) || null
-    : range?.start ?? null
-  const verseEnd = isCustomRange
-    ? Number(customEnd) || null
-    : range?.end ?? null
-
   const versesQuery = useBibleVerses(selectedBook, selectedChapter, verseStart, verseEnd)
-  const searchQuery = useBibleSearch(q, 'tdb77', 20)
+  const searchQuery = useBibleSearch(searchQ, 'tdb77', 20)
 
   const books = booksQuery.data?.books ?? []
   const chapters = chaptersQuery.data?.chapters ?? []
   const verses = versesQuery.data?.verses ?? []
   const bookName = versesQuery.data?.book_name ?? selectedBook ?? ''
+
+  // Parse reference input → update state
+  const applyRef = useCallback((value: string) => {
+    const parsed = parseRef(value)
+    if (!parsed) return
+    // Only update if book actually changed
+    setSelectedBook((prev) => {
+      if (prev !== parsed.book) {
+        setSelectedChapter(null)
+        setVerseStart(null)
+        setVerseEnd(null)
+      }
+      return parsed.book
+    })
+    setSelectedChapter(parsed.chapter)
+    setVerseStart(parsed.verseStart)
+    setVerseEnd(parsed.verseEnd)
+  }, [])
+
+  // When user types in reference input, parse and apply on Enter
+  const handleRefKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      applyRef(refInput)
+    }
+  }
+
+  // Sync dropdowns → reference input
+  const syncRef = useCallback((book: string | null, chapter: number | null, vStart: number | null, vEnd: number | null) => {
+    setRefInput(buildRef(book ?? '', chapter, vStart, vEnd))
+  }, [])
+
+  // Book dropdown change
+  const handleBookChange = (book: string) => {
+    setSelectedBook(book)
+    setSelectedChapter(null)
+    setVerseStart(null)
+    setVerseEnd(null)
+    syncRef(book, null, null, null)
+  }
+
+  // Chapter dropdown change
+  const handleChapterChange = (ch: string) => {
+    const chapter = Number(ch)
+    setSelectedChapter(chapter)
+    setVerseStart(null)
+    setVerseEnd(null)
+    syncRef(selectedBook, chapter, null, null)
+  }
+
+  // Verse dropdown change
+  const handleVerseChange = (val: string) => {
+    if (val === 'all') {
+      setVerseStart(null)
+      setVerseEnd(null)
+      syncRef(selectedBook, selectedChapter, null, null)
+    } else {
+      const [s, e] = val.split('-').map(Number)
+      setVerseStart(s)
+      setVerseEnd(e ?? s)
+      syncRef(selectedBook, selectedChapter, s, e ?? s)
+    }
+  }
+
+  // Quick verse presets
+  const quickVerses = [
+    { label: 'All', value: 'all' },
+    { label: '1', value: '1' },
+    { label: '1–5', value: '1-5' },
+    { label: '1–10', value: '1-10' },
+    { label: '1–20', value: '1-20' },
+  ]
+
+  // Current verse dropdown value
+  const currentVerseVal = verseStart != null && verseEnd != null
+    ? (verseStart === verseEnd ? `${verseStart}` : `${verseStart}-${verseEnd}`)
+    : 'all'
 
   const toggleLang = (key: LanguageKey) => {
     setVisibleLangs((prev) => {
@@ -134,38 +205,52 @@ export function BiblePanel() {
   const otBooks = books.filter((b) => !NT_ABBRS.has(b.abbr))
   const ntBooks = books.filter((b) => NT_ABBRS.has(b.abbr))
 
+  const refLabel = selectedBook
+    ? `${bookName} ${selectedChapter ?? ''}` +
+      (verseStart != null && verseEnd != null && verseStart !== verseEnd
+        ? `:${verseStart}–${verseEnd}`
+        : verseStart != null
+          ? `:${verseStart}`
+          : '')
+    : ''
+
   return (
-    <PanelShell title="Bible" description="Browse \u00b7 search \u00b7 parallel translations">
+    <PanelShell title="Bible" description="Browse · search · parallel translations">
       <div className="space-y-4">
-        {/* Search bar */}
+        {/* Reference input */}
         <div className="flex items-center gap-2">
           <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={refInput}
+            onChange={(e) => setRefInput(e.target.value)}
+            onKeyDown={handleRefKeyDown}
+            onBlur={() => applyRef(refInput)}
+            placeholder="e.g. GEN 1:1-5"
+            className="flex-1"
+          />
+        </div>
+
+        {/* Search input */}
+        <div className="flex items-center gap-2">
+          <Input
+            value={searchQ}
+            onChange={(e) => setSearchQ(e.target.value)}
             placeholder="Search verses (EN or ZO)..."
+            className="flex-1"
           />
           <Button
             size="sm"
-            disabled={!q.trim() || searchQuery.isFetching}
+            disabled={!searchQ.trim() || searchQuery.isFetching}
             onClick={() => void searchQuery.refetch()}
           >
             Search
           </Button>
         </div>
 
-        {/* Book dropdown */}
+        {/* Book / Chapter / Verse dropdowns */}
         <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground w-12">Book</label>
-          <Select
-            value={selectedBook ?? ''}
-            onValueChange={(v) => {
-              setSelectedBook(v)
-              setSelectedChapter(null)
-              setSelectedVerse(null)
-            }}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select a book..." />
+          <Select value={selectedBook ?? ''} onValueChange={handleBookChange}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Book…" />
             </SelectTrigger>
             <SelectContent>
               {otBooks.length > 0 && (
@@ -190,81 +275,36 @@ export function BiblePanel() {
               )}
             </SelectContent>
           </Select>
-        </div>
 
-        {/* Chapter dropdown */}
-        {selectedBook && (
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-muted-foreground w-12">Chapter</label>
-            <Select
-              value={selectedChapter?.toString() ?? ''}
-              onValueChange={(v) => {
-                setSelectedChapter(Number(v))
-                setSelectedVerse(null)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Chapter..." />
+          {selectedBook && (
+            <Select value={selectedChapter?.toString() ?? ''} onValueChange={handleChapterChange}>
+              <SelectTrigger className="w-24">
+                <SelectValue placeholder="Ch…" />
               </SelectTrigger>
               <SelectContent>
                 {chapters.map((c) => (
                   <SelectItem key={c.chapter} value={c.chapter.toString()}>
-                    {c.chapter} ({c.verses}v)
+                    {c.chapter}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        )}
+          )}
 
-        {/* Verse range selector */}
-        {selectedBook && selectedChapter && (
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-muted-foreground w-12">Verses</label>
-            <div className="flex flex-wrap gap-1">
-              {VERSE_RANGES.map((r, i) => (
-                <Button
-                  key={i}
-                  size="sm"
-                  variant={verseRange === i ? 'default' : 'outline'}
-                  className="h-6 px-2 text-xs"
-                  onClick={() => { setVerseRange(i); setSelectedVerse(null) }}
-                >
-                  {r.label}
-                </Button>
-              ))}
-              <Button
-                size="sm"
-                variant={isCustomRange ? 'default' : 'outline'}
-                className="h-6 px-2 text-xs"
-                onClick={() => { setVerseRange(VERSE_RANGES.length); setSelectedVerse(null) }}
-              >
-                Custom
-              </Button>
-            </div>
-            {isCustomRange && (
-              <div className="flex items-center gap-1 ml-2">
-                <Input
-                  type="number"
-                  min={1}
-                  value={customStart}
-                  onChange={(e) => setCustomStart(e.target.value)}
-                  placeholder="Start"
-                  className="w-16 h-6 text-xs"
-                />
-                <span className="text-xs text-muted-foreground">-</span>
-                <Input
-                  type="number"
-                  min={1}
-                  value={customEnd}
-                  onChange={(e) => setCustomEnd(e.target.value)}
-                  placeholder="End"
-                  className="w-16 h-6 text-xs"
-                />
-              </div>
-            )}
-          </div>
-        )}
+          {selectedBook && selectedChapter && (
+            <Select value={currentVerseVal} onValueChange={handleVerseChange}>
+              <SelectTrigger className="w-20">
+                <SelectValue placeholder="Verse…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {quickVerses.filter((v) => v.value !== 'all').map((v) => (
+                  <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
 
         {/* Language toggles */}
         <div className="flex flex-wrap gap-1">
@@ -284,7 +324,7 @@ export function BiblePanel() {
         {/* Results */}
         {searchQuery.isLoading || searchQuery.isFetching ? (
           <Skeleton className="h-32 w-full" />
-        ) : q.trim() && searchQuery.data?.results ? (
+        ) : searchQ.trim() && searchQuery.data?.results ? (
           <div>
             <p className="mb-1 text-xs text-muted-foreground">
               Search results ({searchQuery.data.results.length})
@@ -299,8 +339,6 @@ export function BiblePanel() {
                 book_name: r.book ?? '',
               }))}
               visibleLangs={visibleLangs}
-              selectedVerse={selectedVerse}
-              onSelectVerse={setSelectedVerse}
             />
           </div>
         ) : versesQuery.isLoading ? (
@@ -308,18 +346,15 @@ export function BiblePanel() {
         ) : selectedBook && selectedChapter ? (
           <div>
             <p className="mb-1 text-xs text-muted-foreground">
-              {bookName} {selectedChapter}
-              {verseStart != null && verseEnd != null ? `:${verseStart}\u2013${verseEnd}` : ''}
-              {' '}({verses.length} verses)
+              {refLabel} ({verses.length} verses)
             </p>
-            <VerseDisplay
-              verses={verses}
-              visibleLangs={visibleLangs}
-              selectedVerse={selectedVerse}
-              onSelectVerse={setSelectedVerse}
-            />
+            <VerseDisplay verses={verses} visibleLangs={visibleLangs} />
           </div>
-        ) : null}
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Select a book and chapter to start reading.
+          </p>
+        )}
       </div>
     </PanelShell>
   )

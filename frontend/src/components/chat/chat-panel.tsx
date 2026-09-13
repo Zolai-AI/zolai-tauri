@@ -1,27 +1,45 @@
-import { useRef, useState } from 'react'
-import { Send } from 'lucide-react'
+import { useRef, useState, useEffect } from 'react'
+import { Send, Trash2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { ChatMessage } from '@/components/chat/chat-message'
-import { PanelShell } from '@/components/panel/panel-shell'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { chatStream } from '@/lib/ai/provider'
-import { loadSettings } from '@/lib/zolai-core/config'
+import { loadSettings, MODEL_PRESETS } from '@/lib/zolai-core/config'
 import type { ChatMessageRole } from '@/lib/zolai-core/types'
+
+const SUGGESTIONS = [
+  "Translate 'God created the earth' to Zolai",
+  "What does 'pasian' mean?",
+  'Check ZVS compliance: Pathian in gam a piangsak hi',
+  'Teach me Zolai negation',
+]
 
 export function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessageRole[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const settings = loadSettings()
+  const preset = MODEL_PRESETS[settings.provider]
+  const providerLabel = preset?.label ?? settings.provider
+  const modelShort = settings.model.split('/').pop() ?? settings.model
 
-  function scrollToBottom() {
+  // Auto-scroll on new messages
+  useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }
+  }, [messages])
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`
+  }, [input])
 
   async function handleSend() {
     const text = input.trim()
@@ -42,7 +60,6 @@ export function ChatPanel() {
           next[next.length - 1] = { role: 'assistant', content: tokenStream }
           return next
         })
-        scrollToBottom()
       })
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
@@ -59,50 +76,118 @@ export function ChatPanel() {
       toast.error(msg)
     } finally {
       setBusy(false)
-      scrollToBottom()
     }
   }
 
-  return (
-    <PanelShell
-      title="Chat"
-      description={settings.zolaiMode ? 'Zolai-aware · local /chat/zolai' : `Generic OpenAI-compatible · ${settings.provider}`}
-      scroll={false}
-    >
-      <div className="flex h-full flex-col gap-3">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto">
-          <div className="flex flex-col gap-2 p-1">
-            {messages.length === 0 ? (
-              <p className="px-1 py-6 text-center text-sm text-muted-foreground">
-                Ask a question. Switch Zolai-aware vs generic mode in Settings.
-              </p>
-            ) : (
-              messages.map((m, i) => (
-                <ChatMessage
-                  key={i}
-                  message={m}
-                  streaming={busy && i === messages.length - 1 && m.role === 'assistant'}
-                />
-              ))
-            )}
-          </div>
-        </div>
+  function handleClear() {
+    setMessages([])
+    setInput('')
+  }
 
-        <div className="flex shrink-0 items-center gap-2 border-t border-border pt-3">
-          <Input
+  function handleSuggestion(text: string) {
+    setInput(text)
+    textareaRef.current?.focus()
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      void handleSend()
+    }
+  }
+
+  const isEmpty = messages.length === 0
+
+  return (
+    <div className="flex h-full flex-col bg-background">
+      {/* Top bar — provider/model indicator */}
+      <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">{modelShort}</span>
+          <span className="text-xs text-muted-foreground">· {providerLabel}</span>
+          {settings.zolaiMode ? (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">Zolai</span>
+          ) : null}
+        </div>
+        {messages.length > 0 ? (
+          <Button variant="ghost" size="icon" className="size-7" onClick={handleClear} aria-label="Clear chat">
+            <Trash2 className="size-3.5 text-muted-foreground" />
+          </Button>
+        ) : null}
+      </div>
+
+      {/* Messages area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        {isEmpty ? (
+          /* Empty state */
+          <div className="flex h-full flex-col items-center justify-center gap-6 px-4">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10">
+              <Sparkles className="size-7 text-primary" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-foreground">
+                {settings.zolaiMode ? 'Zolai AI Assistant' : 'AI Chat'}
+              </h2>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                {settings.zolaiMode
+                  ? 'Ask about Zolai grammar, vocabulary, translations, and more.'
+                  : `Connected to ${providerLabel} · ${modelShort}`}
+              </p>
+            </div>
+            <div className="flex max-w-md flex-wrap justify-center gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSuggestion(s)}
+                  className="rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Message list */
+          <div className="mx-auto flex max-w-3xl flex-col gap-4 p-4">
+            {messages.map((m, i) => (
+              <ChatMessage
+                key={i}
+                message={m}
+                streaming={busy && i === messages.length - 1 && m.role === 'assistant'}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Input area */}
+      <div className="shrink-0 border-t border-border bg-background p-3">
+        <div className="mx-auto flex max-w-3xl items-end gap-2">
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void handleSend()
-            }}
-            placeholder={settings.zolaiMode ? 'Compose a Zolai prompt…' : 'Type a message…'}
+            onKeyDown={handleKeyDown}
+            placeholder={settings.zolaiMode ? 'Ask about Zolai…' : 'Type a message…'}
             disabled={busy}
+            rows={1}
+            className="flex-1 resize-none rounded-xl border border-border bg-muted/20 px-4 py-2.5 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
-          <Button size="icon" onClick={() => void handleSend()} disabled={busy} aria-label="Send">
+          <Button
+            size="icon"
+            className="size-9 shrink-0 rounded-full"
+            onClick={() => void handleSend()}
+            disabled={busy || !input.trim()}
+            aria-label="Send"
+          >
             <Send className="size-4" />
           </Button>
         </div>
+        <p className="mx-auto mt-1.5 max-w-3xl text-center text-[11px] text-muted-foreground/60">
+          Enter to send · Shift+Enter for new line
+        </p>
       </div>
-    </PanelShell>
+    </div>
   )
 }

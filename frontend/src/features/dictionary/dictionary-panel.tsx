@@ -24,6 +24,42 @@ import {
 import type { DictEntry, RunScriptResult } from '@/lib/zolai-core/types'
 import { ChevronLeft, ChevronRight, Search, Plus, Pencil, Trash2, AlertTriangle } from 'lucide-react'
 
+// ---------------------------------------------------------------------------
+// Entry validation — reject junk / non-Zolai entries
+// ---------------------------------------------------------------------------
+
+/** Check if a dictionary entry is a valid Zolai headword (not junk). */
+function isValidZolaiEntry(entry: DictEntry): boolean {
+  const word = (entry.zolai ?? entry.word ?? entry.key ?? '').trim()
+
+  // Empty or too short
+  if (!word || word.length < 2) return false
+
+  // Reject if starts with special chars: ( & # % < > " ␓ [ { or whitespace
+  if (/^[(&#%<>"\u2413\s[\]{}]/.test(word)) return false
+
+  // Reject if contains HTML entities like &amp; &#123; &nbsp;
+  if (/&[a-z]+;|&#\d+;/.test(word)) return false
+
+  // Reject if contains spaces — multi-word = phrase, not a headword
+  if (/\s/.test(word)) return false
+
+  // Reject if pure punctuation/symbols (no word characters at all)
+  if (/^[^\p{L}\p{N}_]+$/u.test(word)) return false
+
+  // Reject if both translations are missing or are dashes
+  const eng = (entry.english ?? '').trim()
+  const mya = (entry.myanmar ?? '').trim()
+  if (!eng && !mya) return false
+  if (eng === '—' && mya === '—') return false
+
+  return true
+}
+
+// ---------------------------------------------------------------------------
+// Display helpers
+// ---------------------------------------------------------------------------
+
 /** Clean dictionary text for display: strip HTML entities, control chars, truncate. */
 function cleanDisplay(text: string | undefined | null): string {
   if (!text) return '—'
@@ -79,9 +115,17 @@ function DictEntryCard({ entry, highlight }: { entry: DictEntry; highlight?: str
   )
 }
 
-const LETTERS = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
 const PAGE_SIZE = 25
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function DictionaryPanel() {
   const [activeTab, setActiveTab] = useState('browse')
@@ -115,25 +159,27 @@ export function DictionaryPanel() {
   const entries = useMemo(() => {
     const data = browse.data
     if (!data) return []
-    if (Array.isArray(data.results) && data.results.length > 0) return data.results as DictEntry[]
-    if (Array.isArray(data.rows)) {
-      return data.rows.map((r) => ({
+    let raw: DictEntry[] = []
+    if (Array.isArray(data.results) && data.results.length > 0) raw = data.results as DictEntry[]
+    else if (Array.isArray(data.rows)) {
+      raw = data.rows.map((r) => ({
         zolai: String(r.zolai ?? r.word ?? r.headword ?? ''),
         english: String(r.english ?? ''),
         myanmar: String(r.myanmar ?? ''),
         pos: String(r.pos ?? ''),
       })) as DictEntry[]
     }
-    return []
+    return raw.filter(isValidZolaiEntry)
   }, [browse.data])
 
   const searchEntries = useMemo(() => {
     if (!search.data) return []
-    return Array.isArray(search.data.results) ? search.data.results : []
+    const raw = Array.isArray(search.data.results) ? search.data.results : []
+    return raw.filter(isValidZolaiEntry)
   }, [search.data])
 
   const handleLetterChange = useCallback((l: string) => {
-    setLetter(l === '#' ? '' : l)
+    setLetter(l)
     setPage(1)
   }, [])
 
@@ -188,14 +234,14 @@ export function DictionaryPanel() {
 
           {/* Browse Tab */}
           <TabsContent value="browse" className="pt-2 space-y-3">
-            {/* Letter filter */}
+            {/* Letter filter — A-Z only, no # */}
             <div className="flex flex-wrap gap-1">
               {LETTERS.map((l) => (
                 <button
                   key={l}
                   onClick={() => handleLetterChange(l)}
                   className={`size-7 rounded text-xs font-medium transition-colors ${
-                    (l === '#' && letter === '') || l === letter
+                    l === letter
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
                   }`}

@@ -33,7 +33,7 @@ const QK = {
   monitorCoverage: ['monitor', 'coverage'] as const,
   monitorAudit: (limit: number) => ['monitor', 'audit', limit] as const,
   dictSearch: (q: string, limit: number) => ['dict', 'search', q, limit] as const,
-  dictBrowse: (limit: number) => ['dict', 'browse', limit] as const,
+  dictBrowse: (limit: number) => ['dict', 'browse', limit] as const, // legacy, prefer inline keys
   dictMySearch: (q: string) => ['dict', 'my', q] as const,
   bibleSearch: (q: string, version: string, limit: number) =>
     ['bible', 'search', q, version, limit] as const,
@@ -168,8 +168,25 @@ export function useDictSearch(query: string, limit = 20): UseQueryResult<DictSea
 
 export function useDictBrowse(limit = 50): UseQueryResult<DictDenormalized, Error> {
   return useQuery({
-    queryKey: QK.dictBrowse(limit),
+    queryKey: ['dict', 'browse', limit],
     queryFn: () => client.getJson<DictDenormalized>(ROUTES.dictBrowse.path, { limit }),
+    ...defaultQueryOptions,
+  })
+}
+
+export function useDictBrowsePaginated(
+  page: number,
+  pageSize = 25,
+  letter?: string,
+): UseQueryResult<DictDenormalized, Error> {
+  return useQuery({
+    queryKey: ['dict', 'browse', page, pageSize, letter ?? ''],
+    queryFn: () =>
+      client.getJson<DictDenormalized>(ROUTES.dictBrowse.path, {
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+        ...(letter ? { q: letter } : {}),
+      }),
     ...defaultQueryOptions,
   })
 }
@@ -273,15 +290,25 @@ export function useBibleTopics(): UseMutationResult<RunScriptResult, Error, void
 }
 
 // ---- gemini mutations ------------------------------------------------------
-export function useGeminiFillEn(): UseMutationResult<RunScriptResult, Error, number> {
+export function useGeminiFillEn(): UseMutationResult<RunScriptResult, Error, { limit: number; provider?: string; model?: string }> {
   return useMutation({
-    mutationFn: (limit) => client.getJson<RunScriptResult>(ROUTES.geminiFillEn.path, { limit }),
+    mutationFn: ({ limit, provider, model }) =>
+      client.getJson<RunScriptResult>(ROUTES.geminiFillEn.path, {
+        limit,
+        ...(provider ? { provider } : {}),
+        ...(model ? { model } : {}),
+      }),
   })
 }
 
-export function useGeminiFillMy(): UseMutationResult<RunScriptResult, Error, number> {
+export function useGeminiFillMy(): UseMutationResult<RunScriptResult, Error, { limit: number; provider?: string; model?: string }> {
   return useMutation({
-    mutationFn: (limit) => client.getJson<RunScriptResult>(ROUTES.geminiFillMy.path, { limit }),
+    mutationFn: ({ limit, provider, model }) =>
+      client.getJson<RunScriptResult>(ROUTES.geminiFillMy.path, {
+        limit,
+        ...(provider ? { provider } : {}),
+        ...(model ? { model } : {}),
+      }),
   })
 }
 

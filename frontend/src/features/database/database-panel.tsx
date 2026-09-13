@@ -24,9 +24,9 @@ import type { TableRow as TableInfo } from '@/lib/zolai-core/types'
 
 const PAGE_SIZE = 25
 
-/** Resolve table name from either `name` or `table_name` field. */
+/** Resolve table name from `table`, `name`, or `table_name` field. */
 function tableName(t: TableInfo): string {
-  return t.name ?? t.table_name ?? 'unknown'
+  return t.table ?? t.name ?? t.table_name ?? 'unknown'
 }
 
 export function DatabasePanel() {

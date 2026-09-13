@@ -66,6 +66,7 @@ export const ROUTES = {
 
   // ---- Chat ---------------------------------------------------------------
   chatZolai: { method: METHOD.POST, path: '/chat/zolai' },
+  chatGemini: { method: METHOD.POST, path: '/chat/gemini' },
 } as const
 
 export type ExportDataType =

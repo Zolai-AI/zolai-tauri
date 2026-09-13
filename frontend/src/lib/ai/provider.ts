@@ -82,9 +82,13 @@ async function chatStreamZolai(
   const lastUser = [...messages].reverse().find((m) => m.role === 'user')
   const message = lastUser?.content ?? ''
 
+  // Route to correct endpoint based on provider
+  const isGemini = settings.provider === 'gemini'
+  const endpoint = isGemini ? ROUTES.chatGemini.path : ROUTES.chatZolai.path
+
   try {
     const data = await postJson<{ zolai_response: string; error?: string }>(
-      ROUTES.chatZolai.path,
+      endpoint,
       {
         message,
         model: settings.model,
@@ -102,11 +106,11 @@ async function chatStreamZolai(
       onToken(text)
     } else {
       throw new ChatProviderError(
-        'Empty response from Zolai chat. Is the backend running with the correct model?',
+        'Empty response. Is the backend running with the correct provider?',
       )
     }
   } catch (cause) {
     if (cause instanceof ChatProviderError) throw cause
-    throw new ChatProviderError(`Zolai chat failed: ${String(cause)}`)
+    throw new ChatProviderError(`Chat failed: ${String(cause)}`)
   }
 }

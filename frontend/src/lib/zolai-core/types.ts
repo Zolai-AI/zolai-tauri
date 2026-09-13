@@ -99,6 +99,7 @@ export interface DictDenormalized {
   query?: string
   results?: DictEntry[]
   count?: number
+  total?: number
   columns?: string[]
   rows?: Array<Record<string, unknown>>
   [key: string]: unknown

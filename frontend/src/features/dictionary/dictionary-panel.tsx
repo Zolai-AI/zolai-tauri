@@ -25,7 +25,7 @@ import type { DictEntry, RunScriptResult } from '@/lib/zolai-core/types'
 import { ChevronLeft, ChevronRight, Search, Plus, Pencil, Trash2, AlertTriangle } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// Entry validation — reject junk / non-Zolai entries
+// Entry validation — reject junk / non-Zolai entries (for search fallback only)
 // ---------------------------------------------------------------------------
 
 /** Check if a dictionary entry is a valid Zolai headword (not junk). */
@@ -38,7 +38,7 @@ function isValidZolaiEntry(entry: DictEntry): boolean {
   // Reject if starts with special chars: ( & # % < > " ␓ [ { or whitespace
   if (/^[(&#%<>"\u2413\s[\]{}]/.test(word)) return false
 
-  // Reject if contains HTML entities like &amp; &#123; &nbsp;
+  // Reject if contains HTML entities like & &#123; &nbsp;
   if (/&[a-z]+;|&#\d+;/.test(word)) return false
 
   // Reject if contains spaces — multi-word = phrase, not a headword
@@ -169,7 +169,8 @@ export function DictionaryPanel() {
         pos: String(r.pos ?? ''),
       })) as DictEntry[]
     }
-    return raw.filter(isValidZolaiEntry)
+    // Backend now filters with clean=true, so no need for client-side filtering
+    return raw
   }, [browse.data])
 
   const searchEntries = useMemo(() => {

@@ -184,12 +184,13 @@ export function useDictBrowsePaginated(
   letter?: string,
 ): UseQueryResult<DictDenormalized, Error> {
   return useQuery({
-    queryKey: ['dict', 'browse', page, pageSize, letter ?? ''],
+    queryKey: ['dict', 'browse', page, pageSize, letter ?? '', true],
     queryFn: () =>
       client.getJson<DictDenormalized>(ROUTES.dictBrowse.path, {
         limit: pageSize,
         offset: (page - 1) * pageSize,
         ...(letter ? { q: letter } : {}),
+        clean: true,
       }),
     ...defaultQueryOptions,
   })

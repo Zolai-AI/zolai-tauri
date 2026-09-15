@@ -172,7 +172,7 @@ export function GeminiPanel() {
           {coverage.isLoading ? (
             <Skeleton className="h-16 w-full" />
           ) : (
-            <RunScriptBlock result={coverage.data} />
+            <RunScriptBlock result={coverage.data ? { success: true, output: JSON.stringify(coverage.data, null, 2) } : null} />
           )}
         </div>
       </div>

@@ -78,6 +78,10 @@ export const SettingsSchema = z.object({
   model: z.string().min(1),
   /** true = Zolai-aware chat (POST /chat/zolai); false = OpenAI-compatible chat. */
   zolaiMode: z.boolean(),
+  /** Enable ensemble mode (dispatch to N models, majority vote). */
+  ensembleEnabled: z.boolean(),
+  /** Number of models in ensemble (3–9). */
+  ensembleCount: z.number().int().min(3).max(9),
 })
 
 export type Settings = z.infer<typeof SettingsSchema>
@@ -91,6 +95,8 @@ export const DEFAULT_SETTINGS: Settings = {
   apiKey: '',
   model: 'gemini-3-flash',
   zolaiMode: true,
+  ensembleEnabled: false,
+  ensembleCount: 3,
 }
 
 export function loadSettings(): Settings {

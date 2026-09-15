@@ -93,6 +93,8 @@ async function chatStreamZolai(
         message,
         model: settings.model,
         session_id: 'desktop-' + Date.now(),
+        ensemble_enabled: settings.ensembleEnabled,
+        ensemble_count: settings.ensembleCount,
       },
     )
 

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /** Available provider IDs. */
-export type ProviderId = 'openai' | 'gemini' | 'anthropic' | 'ollama' | 'openrouter' | 'custom'
+export type ProviderId = 'openai' | 'gemini' | 'anthropic' | 'ollama' | 'openrouter' | 'rule_based' | 'custom'
 
 /** Ollama local base URL. */
 export const OLLAMA_BASE_URL = 'http://localhost:11434'
@@ -56,6 +56,12 @@ export const MODEL_PRESETS: Record<
     default: 'mimo-v2.5-free',
     needsKey: true,
   },
+  rule_based: {
+    label: 'Rule-Based (No AI)',
+    models: [],
+    default: 'rule_based',
+    needsKey: false,
+  },
   custom: {
     label: 'Custom (OpenAI-compatible)',
     models: [],
@@ -82,6 +88,11 @@ export const SettingsSchema = z.object({
   ensembleEnabled: z.boolean(),
   /** Number of models in ensemble (3–9). */
   ensembleCount: z.number().int().min(3).max(9),
+  /** Learning settings */
+  spacedRepetitionEnabled: z.boolean(),
+  dailyGoalWords: z.number().int().min(1).max(100),
+  autoZvsCorrection: z.boolean(),
+  offlineMode: z.boolean(),
 })
 
 export type Settings = z.infer<typeof SettingsSchema>
@@ -97,6 +108,10 @@ export const DEFAULT_SETTINGS: Settings = {
   zolaiMode: true,
   ensembleEnabled: false,
   ensembleCount: 3,
+  spacedRepetitionEnabled: true,
+  dailyGoalWords: 10,
+  autoZvsCorrection: true,
+  offlineMode: false,
 }
 
 export function loadSettings(): Settings {

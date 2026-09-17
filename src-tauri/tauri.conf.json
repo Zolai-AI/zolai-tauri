@@ -31,8 +31,16 @@
       "sidecar/zolai-api"
     ],
     "resources": [
-      "db/schema.sql"
-    ]
+      "db/schema.sql",
+      "config/llm_providers.yaml"
+    ],
+    "ios": {
+      "minimumSystemVersion": "15.0"
+    },
+    "android": {
+      "minSdkVersion": 24,
+      "targetSdkVersion": 34
+    }
   },
   "plugins": {
     "shell": {

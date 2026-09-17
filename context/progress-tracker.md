@@ -307,3 +307,39 @@
 - Application code updates: ✅ COMPLETE
 - CLI/Script fixes: ✅ COMPLETE
 - Frontend (zolai-tauri): Dictionary "No entries found" - needs server-side filtering
+
+## 2026-09-15 (Session — Chat + Table + CLI + TS Fixes)
+
+### Chat Provider Configuration
+- **Default provider**: Gemini WebAPI (not Ollama)
+- `/chat/gemini` endpoint: ✅ Working — returns ZVS-compliant responses
+- `/chat/zolai` endpoint: ⚠️ Requires Ollama running (not primary)
+- Frontend routes: gemini provider → `/chat/gemini`, others → `/chat/zolai`
+
+### Backend Fixes (zolai-core)
+- Added `/desktop/ollama/models` endpoint for dynamic model fetch
+- `/desktop/table-data` endpoint: ✅ Working with canonical table names
+- `/desktop/dict/browse?clean=true`: ✅ Returns 6,104 valid entries
+
+### Frontend Fixes (zolai-tauri)
+- Fixed TypeScript error in `gemini-panel.tsx` (RunScriptBlock type mismatch)
+- Dictionary clean filter: ✅ Browse tab uses `clean=true` by default
+- All TS checks pass
+
+### CLI Fixes
+- Fixed proficiency test `--interactive` flag (removed, not supported)
+- Fixed `vocab` → `vocabulary` in menu table checks
+- Proficiency test: ✅ Works with `--level A1 --count 5`
+
+### Commits
+- `zolai-core`: `c67d762` — fix: ollama models endpoint + canonical table data
+- `zolai-tauri`: `3e57111` — fix: TS error + clean dict filter
+- Both pushed to origin
+
+### Chat Flow (User → Gemini)
+```
+User types message → Frontend chatStreamZolai() → POST /chat/gemini
+→ Backend calls zolai-ai-local Gemini WebAPI (Chrome cookies, no API key)
+→ Returns ZVS-compliant Zolai response
+→ Frontend displays with markdown rendering
+```

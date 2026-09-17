@@ -102,7 +102,6 @@ impl SidecarManager {
 
         // Spawn a background thread to wait on the child process
         std::thread::spawn(move || {
-            use std::process::Child;
             // We need to own the child here but we can't move it.
             // Instead we poll the PID.
             let _ = api_url; // keep for logging
@@ -136,8 +135,8 @@ impl SidecarManager {
                 "--port", &port_arg,
                 "--host", "127.0.0.1",
             ])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .spawn();
 
         match result {
@@ -158,8 +157,8 @@ impl SidecarManager {
                 "--host", "127.0.0.1",
                 "--port", &port_arg,
             ])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .spawn();
 
         match result {

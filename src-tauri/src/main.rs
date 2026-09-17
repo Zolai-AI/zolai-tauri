@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod sidecar;
+
 use rusqlite::params;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -352,8 +354,101 @@ fn db_count(table: String) -> Result<CountResult, String> {
   Ok(CountResult { table, count })
 }
 
+// ---------------------------------------------------------------------------
+// Python API Sidecar Commands
+// ---------------------------------------------------------------------------
+
+use std::sync::OnceLock;
+
+/// Shared sidecar manager, initialized once.
+fn sidecar_manager() -> &'static sidecar::SidecarManager {
+  static INSTANCE: OnceLock<sidecar::SidecarManager> = OnceLock::new();
+  INSTANCE.get_or_init(sidecar::SidecarManager::default_port)
+}
+
+#[derive(Serialize)]
+struct ApiStatusResponse {
+  running: bool,
+  port: u16,
+  pid: Option<u32>,
+  api_url: String,
+  health: Option<sidecar::HealthCheckResult>,
+}
+
+#[tauri::command]
+async fn api_status() -> Result<ApiStatusResponse, String> {
+  let mgr = sidecar_manager();
+  let status = mgr.status();
+  let health = mgr.health_check().await;
+  Ok(ApiStatusResponse {
+    running: status.running,
+    port: status.port,
+    pid: status.pid,
+    api_url: status.api_url,
+    health: Some(health),
+  })
+}
+
+#[tauri::command]
+async fn api_start(app: tauri::AppHandle) -> Result<sidecar::SidecarStatus, String> {
+  let mgr = sidecar_manager();
+  let status = mgr.start(&app)?;
+
+  if status.running {
+    // Wait for the API to become ready
+    let health = mgr.wait_for_ready().await;
+    if !health.ok {
+      return Err(format!("API started but health check failed: {}", health.message));
+    }
+  }
+
+  Ok(status)
+}
+
+#[tauri::command]
+async fn api_stop() -> Result<sidecar::SidecarStatus, String> {
+  let mgr = sidecar_manager();
+  mgr.stop()
+}
+
 fn main() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_shell::init())
+    .plugin(tauri_plugin_fs::init())
+    .setup(|app| {
+      // Auto-start the Python API sidecar on app launch
+      let handle = app.handle().clone();
+      let mgr = sidecar_manager();
+      match mgr.start(&handle) {
+        Ok(status) => {
+          log::info!("Sidecar started: port={}, pid={:?}", status.port, status.pid);
+          // Wait for ready in background
+          let mgr_clone = sidecar_manager();
+          let handle_clone = handle.clone();
+          tokio::spawn(async move {
+            let health = mgr_clone.wait_for_ready().await;
+            if health.ok {
+              log::info!("Sidecar API ready: {}", health.message);
+              let _ = handle_clone.emit("sidecar:ready", serde_json::json!({
+                "ok": true,
+                "message": health.message
+              }));
+            } else {
+              log::warn!("Sidecar API not ready: {}", health.message);
+              let _ = handle_clone.emit("sidecar:ready", serde_json::json!({
+                "ok": false,
+                "message": health.message
+              }));
+            }
+          });
+        }
+        Err(e) => {
+          log::error!("Failed to start sidecar: {e}");
+          // Non-fatal: the app can still work with direct DB access
+        }
+      }
+      Ok(())
+    })
     .invoke_handler(tauri::generate_handler![
       run_kg_build,
       run_kg_build_stream,
@@ -370,9 +465,21 @@ fn main() {
       db_lookup_word,
       db_search_bible,
       db_count,
+      api_status,
+      api_start,
+      api_stop,
     ])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .build(tauri::generate_context!())
+    .expect("error while building tauri application")
+    .run(|app_handle, event| {
+      if let tauri::RunEvent::Exit = event {
+        // Cleanup: stop the sidecar
+        let mgr = sidecar_manager();
+        if let Err(e) = mgr.stop() {
+          log::error!("Failed to stop sidecar on exit: {e}");
+        }
+      }
+    });
 }
 
 #[cfg(test)]

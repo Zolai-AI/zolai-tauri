@@ -26,6 +26,25 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": "all",
+    "externalBin": [
+      "sidecar/zolai-api"
+    ],
+    "resources": [
+      "db/schema.sql"
+    ]
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "scope": [
+        {
+          "name": "sidecar",
+          "cmd": "zolai-api",
+          "args": true,
+          "sidecar": true
+        }
+      ]
+    }
   }
 }

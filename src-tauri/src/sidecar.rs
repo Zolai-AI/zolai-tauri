@@ -93,7 +93,7 @@ impl SidecarManager {
         let child = self.spawn_process(&python_cmd)?;
 
         let pid = child.id();
-        *self.child_pid.lock().map_err(|e| e.to_string())? = pid;
+        *self.child_pid.lock().map_err(|e| e.to_string())? = Some(pid);
         *is_running = true;
 
         let api_url = self.api_url.clone();
@@ -193,7 +193,7 @@ impl SidecarManager {
 
         match client.get(&url).send().await {
             Ok(resp) => {
-                let status = resp.status().as_u16();
+                let status = resp.status().as_u16() as u32;
                 let ok = resp.status().is_success();
                 HealthCheckResult {
                     ok,

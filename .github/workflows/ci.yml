@@ -20,12 +20,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev libssl-dev pkg-config
 
-      - name: Stub sidecar binary for CI
+      - name: Stub sidecar and bundle resources for CI
         run: |
-          mkdir -p src-tauri/sidecar
-          # tauri-build requires the declared externalBin path to exist
+          mkdir -p src-tauri/sidecar src-tauri/config src-tauri/db
           printf '#!/bin/sh\necho zolai-api-ci-stub\n' > src-tauri/sidecar/zolai-api-x86_64-unknown-linux-gnu
           chmod +x src-tauri/sidecar/zolai-api-x86_64-unknown-linux-gnu
+          # bundle.resources must exist on disk for tauri-build
+          test -f src-tauri/config/llm_providers.yaml || echo 'providers: []' > src-tauri/config/llm_providers.yaml
+          test -f src-tauri/db/schema.sql || echo '-- ci stub schema' > src-tauri/db/schema.sql
 
       - name: Build
         run: cargo build

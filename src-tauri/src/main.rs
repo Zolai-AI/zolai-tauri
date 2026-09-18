@@ -3,12 +3,12 @@
 mod sidecar;
 
 use rusqlite::params;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use tauri::Emitter;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct SidecarResult {
   ok: bool,
   status: Option<i32>,

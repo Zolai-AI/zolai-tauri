@@ -58,3 +58,8 @@ manifest version, RAG feed). See `README.md` > Connect.
 For page/section/layout design, color systems, typography, responsive, and design QA,
 use the installed `web-design-master` skill at `~/.agents/skills/web-design-master`
 (+ `ui-ux-pro-max`, `design-system`, `ui-styling`). Persist tokens into `context/ui-context.md`.
+
+## Secret Hygiene (repo-specific)
+
+- Everything in `src/`, `tauri.conf.json`, and capability/permission configs ships inside the app users install — treat it as fully public. Runtime keys arrive from the backend at call time, never bundled.
+- Canonical rules: workspace-root `AGENTS.md` § Secret Hygiene. Full procedure: `../context/code-standards.md` § Secret Hygiene — Prevention. Staged-change scan gate: `secret-scan` subagent; checklist: `secret-hygiene` skill. Do not duplicate that block here.

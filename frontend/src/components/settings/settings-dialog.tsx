@@ -23,7 +23,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               Connection and AI provider configuration. Saved locally on this device.
             </DialogDescription>
           </DialogHeader>
-          <SettingsForm onClose={() => onOpenChange(false)} />
+          <SettingsForm onSettingsSaved={() => onOpenChange(false)} />
         </DialogContent>
       ) : null}
     </Dialog>

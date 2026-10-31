@@ -2,7 +2,8 @@
  * Dictionary manager component.
  */
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import type { KeyboardEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 interface DictionaryEntry {
@@ -64,7 +65,7 @@ export function DictionaryManager() {
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       handleSearch();
     }

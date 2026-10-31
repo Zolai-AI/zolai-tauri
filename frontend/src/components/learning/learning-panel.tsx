@@ -2,7 +2,7 @@
  * Main learning panel component.
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { GrammarEditor } from "./grammar-editor";
 import { DictionaryManager } from "./dictionary-manager";
 import { TranslationTrainer } from "./translation-trainer";

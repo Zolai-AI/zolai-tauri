@@ -2,9 +2,11 @@
  * Settings form component for Zolai desktop app.
  */
 
-import React, { useState, useEffect } from "react";
-import { fetchSettings, updateSettings, AppSettings } from "../../lib/settings";
-import { fetchProviders, Provider } from "../../lib/providers";
+import { useState, useEffect } from "react";
+import { fetchSettings, updateSettings } from "../../lib/settings";
+import type { AppSettings } from "../../lib/settings";
+import { fetchProviders } from "../../lib/providers";
+import type { Provider } from "../../lib/providers";
 
 interface SettingsFormProps {
   onSettingsSaved?: () => void;

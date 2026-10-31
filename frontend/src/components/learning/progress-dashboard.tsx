@@ -2,7 +2,7 @@
  * Progress dashboard component.
  */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 interface CEFRLevel {

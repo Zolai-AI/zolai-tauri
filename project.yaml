@@ -1,0 +1,44 @@
+project:
+  name: zolai-tauri
+  slug: zolai-tauri
+  display_name: zolai-tauri
+  type: desktop
+  category: ai-platform
+  owner: Zolai-AI
+
+  description: >
+    Offline desktop app (Tauri 2).
+
+version:
+  current: 0.1.0
+  channel: dev
+  release_name: genesis
+  build_number: 001
+
+lifecycle:
+  stage: development
+  status: active
+  started: 2024-01-01
+  updated: 2026-11-23
+
+repository:
+  url: git@github.com:Zolai-AI/zolai-tauri.git
+  branch: main
+  provider: github
+  visibility: public
+
+stack:
+  languages:
+    - typescript
+    - rust
+  frameworks:
+    - tauri
+    - react
+  package_manager: bun
+  runtime: node
+
+ai:
+  assistant: cursor
+  context_dir: context/
+  entry_point: AGENTS.md
+  rules: []

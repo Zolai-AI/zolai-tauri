@@ -88,6 +88,16 @@ Click **Run KG build (desktop)** to run `scripts/kg/build_kg.sh` and stream logs
 ## Notes
 
 - `cargo` is required to compile the desktop shell.
+- **Database engine (config, not code):** the desktop app is offline-first —
+  SQLite (`rusqlite`, bundled) is the embedded default and normal builds do
+  not require a database server. PostgreSQL is an opt-in server mode:
+  rebuild with `cargo build --features postgres` and set
+  `ZOLAI_TAURI_DB_URL` (legacy `ZOLAI_DB_URL` also honoured) to
+  `postgresql://user:pass@host:5432/zolai_tauri`; `sqlite:///path` keeps the
+  embedded store. Commands call the `Db` abstraction in
+  `src-tauri/src/db/mod.rs` — call sites never change when switching.
+  `src-tauri/db/migrate.py` follows the same URL convention (see
+  `src-tauri/db/drivers.py`).
 - Packaging is handled by `desktop/scripts/build-sidecars.sh` (now bundles Next standalone + portable Node; Ollama bundled on Linux amd64).
 - Output installers/bundles are produced by: `cargo tauri build` (see `desktop/src-tauri/target/release/bundle/`).
 

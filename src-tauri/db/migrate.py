@@ -1,37 +1,45 @@
 #!/usr/bin/env python3
-"""Migration script for Zolai Tauri desktop SQLite database.
+"""Migration script for the Zolai Tauri desktop database.
 
-Creates the SQLite database at data/db/zolai.sqlite3 and loads data
-from JSONL files. Uses same logic as zolai-core migrate.py.
+Loads JSONL data into a database created from `db/schema.sql`. The engine is
+chosen by URL, not by code: SQLite (embedded, default) or PostgreSQL (server
+mode, opt-in). See `db/drivers.py`.
 
 Usage:
-    python db/migrate.py [--data-dir PATH] [--db-path PATH]
+    python db/migrate.py [--data-dir PATH] [--db-path PATH] [--db-url URL]
+
+`--db-url` (or ZOLAI_DB_URL) wins over `--db-path`. Examples:
+    sqlite:///data/db/zolai.sqlite3                (default)
+    postgresql://user:pass@host:5432/zolai_tauri   (server mode)
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import sqlite3
+import os
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from drivers import connect, executescript, load_rows, make_driver  # noqa: E402
 
 DEFAULT_DB_PATH = "data/db/zolai.sqlite3"
 DEFAULT_DATA_DIR = "../../data"
 
 
-def create_schema(conn: sqlite3.Connection, schema_path: Path) -> None:
-    """Execute schema.sql to create all tables."""
+def create_schema(driver, conn, schema_path: Path) -> None:
+    """Execute schema.sql to create all tables (portable across engines)."""
     if not schema_path.exists():
         print(f"Error: Schema file not found: {schema_path}")
         sys.exit(1)
     schema_sql = schema_path.read_text()
-    conn.executescript(schema_sql)
+    executescript(driver, conn, schema_sql)
     print(f"Schema created from {schema_path}")
 
 
-def load_jsonl(conn: sqlite3.Connection, filepath: Path, table: str) -> int:
+def load_jsonl(driver, conn, filepath: Path, table: str) -> int:
     """Load a JSONL file into a table. Returns row count."""
     if not filepath.exists():
         print(f"  Skipping {table}: {filepath} not found")
@@ -50,8 +58,6 @@ def load_jsonl(conn: sqlite3.Connection, filepath: Path, table: str) -> int:
 
     # Get column names from first row
     cols = list(rows[0].keys())
-    placeholders = ", ".join(["?"] * len(cols))
-    col_names = ", ".join(cols)
 
     # Serialize JSON columns
     json_cols = {
@@ -70,28 +76,20 @@ def load_jsonl(conn: sqlite3.Connection, filepath: Path, table: str) -> int:
         cleaned.append(clean_row)
 
     # Insert
-    conn.executemany(
-        f"INSERT INTO {table} ({col_names}) VALUES ({placeholders})",
-        cleaned,
-    )
-    conn.commit()
-    print(f"  {table}: {len(cleaned)} rows loaded")
-    return len(cleaned)
+    count = load_rows(driver, conn, table, cols, cleaned)
+    print(f"  {table}: {count} rows loaded")
+    return count
 
 
-def migrate(data_dir: Path, db_path: Path) -> dict[str, int]:
-    """Run full migration."""
+def migrate(data_dir: Path, db_url: str) -> dict[str, int]:
+    """Run full migration against the engine chosen by db_url."""
     schema_path = Path(__file__).parent / "schema.sql"
 
-    # Ensure parent directory exists
-    db_path.parent.mkdir(parents=True, exist_ok=True)
+    driver = make_driver(db_url)
+    conn = connect(db_url)
+    print(f"Engine: {driver.dialect}")
 
-    # Connect and create schema
-    conn = sqlite3.connect(str(db_path))
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA foreign_keys=ON")
-
-    create_schema(conn, schema_path)
+    create_schema(driver, conn, schema_path)
 
     # Map table names to JSONL file paths
     table_files = {
@@ -106,7 +104,7 @@ def migrate(data_dir: Path, db_path: Path) -> dict[str, int]:
 
     results = {}
     for table, filepath in table_files.items():
-        count = load_jsonl(conn, filepath, table)
+        count = load_jsonl(driver, conn, filepath, table)
         results[table] = count
 
     conn.close()
@@ -125,34 +123,47 @@ def main() -> None:
         default=DEFAULT_DB_PATH,
         help="Path to SQLite database (default: data/db/zolai.sqlite3)",
     )
+    parser.add_argument(
+        "--db-url",
+        default=None,
+        help="Full DB URL (sqlite:///… or postgresql://…). Overrides --db-path "
+        "and ZOLAI_DB_URL.",
+    )
     args = parser.parse_args()
 
     data_dir = Path(args.data_dir).resolve()
-    db_path = Path(args.db_path).resolve()
+    if args.db_url:
+        db_url = args.db_url
+    elif os.getenv("ZOLAI_DB_URL", "").strip():
+        db_url = os.environ["ZOLAI_DB_URL"].strip()
+    else:
+        db_url = f"sqlite:///{Path(args.db_path).resolve()}"
 
     print(f"Data directory: {data_dir}")
-    print(f"Database path: {db_path}")
+    print(f"Database URL: {db_url.split('@')[-1] if '@' in db_url else db_url}")
     print()
 
     if not data_dir.exists():
         print(f"Error: Data directory not found: {data_dir}")
         sys.exit(1)
 
-    results = migrate(data_dir, db_path)
+    results = migrate(data_dir, db_url)
 
     total = sum(results.values())
     print(f"\nMigration complete: {total} total rows")
     for table, count in results.items():
         print(f"  {table}: {count:,}")
 
-    # Show DB size
-    if db_path.exists():
-        size = db_path.stat().st_size
-        for unit in ("B", "KB", "MB", "GB"):
-            if size < 1024:
-                print(f"\nDatabase size: {size:.1f} {unit}")
-                break
-            size /= 1024
+    # Show DB size (embedded sqlite only)
+    if db_url.startswith("sqlite:///"):
+        db_path = Path(db_url[len("sqlite:///"):])
+        if db_path.exists():
+            size = db_path.stat().st_size
+            for unit in ("B", "KB", "MB", "GB"):
+                if size < 1024:
+                    print(f"\nDatabase size: {size:.1f} {unit}")
+                    break
+                size /= 1024
 
 
 if __name__ == "__main__":

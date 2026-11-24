@@ -97,7 +97,9 @@ Click **Run KG build (desktop)** to run `scripts/kg/build_kg.sh` and stream logs
   embedded store. Commands call the `Db` abstraction in
   `src-tauri/src/db/mod.rs` — call sites never change when switching.
   `src-tauri/db/migrate.py` follows the same URL convention (see
-  `src-tauri/db/drivers.py`).
+  `src-tauri/db/drivers.py`). Verify the server lane against a scratch
+  database (the test skips itself when the variable is unset):
+  `ZOLAI_TEST_PG_URL=postgresql://postgres:test@localhost:55432/zolai_test cargo test --features postgres live_postgres -- --nocapture`.
 - Packaging is handled by `desktop/scripts/build-sidecars.sh` (now bundles Next standalone + portable Node; Ollama bundled on Linux amd64).
 - Output installers/bundles are produced by: `cargo tauri build` (see `desktop/src-tauri/target/release/bundle/`).
 

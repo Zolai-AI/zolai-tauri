@@ -7,7 +7,7 @@ system (core / web / tauri / datasets / training / wiki). Read the six-file
 `context/` set at session start — it is the ground truth for **this repo only**.
 
 ## Shared Data
-- Corpora, datasets, and bulk artifacts live in the container shared folder at `../data` (relative to this repo). This is **not** committed to this repo — it is a shared, gitignored directory (6.3G) across all six repos.
+- Corpora, datasets, and bulk artifacts live in the container shared folder at `../data` (relative to this repo). This is **not** committed to this repo — it is a shared, gitignored directory across the Zolai-AI org repos.
 - See `../data/README.md` and `../data/DATA_INDEX.md` for data inventory.
 
 ## Scoping
@@ -63,3 +63,19 @@ use the installed `web-design-master` skill at `~/.agents/skills/web-design-mast
 
 - Everything in `src/`, `tauri.conf.json`, and capability/permission configs ships inside the app users install — treat it as fully public. Runtime keys arrive from the backend at call time, never bundled.
 - Canonical rules: workspace-root `AGENTS.md` § Secret Hygiene. Full procedure: `../context/code-standards.md` § Secret Hygiene — Prevention. Staged-change scan gate: `secret-scan` subagent; checklist: `secret-hygiene` skill. Do not duplicate that block here.
+
+## Workspace alignment (2026-11-24)
+
+`zolai-tauri` is the offline desktop client; its Rust/Cargo tree is the native Tauri
+layer only. This repo follows the workspace-canonical 7-stage SDLC and document map.
+
+### ALIGNMENT RECORD — zolai-tauri
+
+- Canonical SDLC: [`../docs/SDLC.md`](../docs/SDLC.md)
+- Canonical source-of-truth: [`../docs/governance/source-of-truth.md`](../docs/governance/source-of-truth.md)
+- Status: aligned 2026-11-24; Tauri 2 architecture unchanged; data comes from `zolai-core`.
+
+### BACKEND/CORE ALIGNMENT RECORD — zolai-tauri
+
+- `no @nestjs dependency found — do not add` (this repo has no Node server layer).
+- Rust/Cargo: Cargo is Tauri native layer only (`src-tauri/Cargo.toml`); no Rust backend service added.
